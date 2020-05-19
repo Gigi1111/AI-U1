@@ -84,7 +84,6 @@ public class MyClass extends AI {
 		//first check if they belong to same obstacle
 		//to types of check  (1)contain(to check if it's two points from same obs) (2)intersect (to see if there's other obs in between)
 		
-//		int k=0;
 		for(int i = 0 ; i <obstacles.length;i++) {
 			
     		for(int j = 0; j<obstacles[i].npoints; j++) {
@@ -96,27 +95,12 @@ public class MyClass extends AI {
 				//first check they are not next to each other
 				if(!p1.equals(p2) && !p1.equals(q2) && !q1.equals(p2) && !q1.equals(q2)) {
 					//only checking line, not checking content
-					if(doIntersect(p1, q1, p2, q2) ) {//&& !p1.equals(p2) && !p1.equals(q2) && !q1.equals(p2) && !q1.equals(q2)) {
+					if(doIntersect(p1, q1, p2, q2) ) {
 						return true;
 					}
 					// checking if mid point contain
 					if(obstacles[i].contains(new Point((p1.x+q1.x)/2,(p1.y+q1.y)/2))) 
 						return true;
-//					if((p1.equals(p2) && q1.equals(q2)) || (q1.equals(p2) && p1.equals(q2))) {
-//						k++;
-//						System.out.println("side "+k);
-////						return false;
-//					}
-					
-	//				if(obstacles[i].contains(new Point((p1.x+q1.x)/2,(p1.y+q1.y)/2))) {
-	//					//but if they next to each other, it's fine
-	////					System.out.println("contains");
-	////					if((p1.equals(p2) && q1.equals(q2)) || (q1.equals(p2) && p1.equals(q2))) {
-	////						
-	////					}
-	////					else
-	////						return true;
-	//				}
 				}
     		}
     	}
@@ -202,21 +186,6 @@ public boolean onemore =false;
     	
 		prevCheckpoint = new Point(info.getCurrentCheckpoint());
     }
-//    if(shortList==null) {
-//    	System.out.println("get shortest");
-//		dpq = new DPQ(g.getNumOfPoints(),g); 
-//	     dpq.dijkstra(); 
-//	     shortList = dpq.printShortestPathTo(dpq.dst);
-//	     getShortest = true;
-//     }
-//    else {
-//    	System.out.println("shortlist !=null");
-//    	
-//    	if(dpq!= null && shortList!=null && shortList.size()>1) {
-//	    	 System.out.println("hi");
-//	    	 doDebugStuff();
-//	     }
-//    }
    	 angularAcc = turnToCheckpoint();
 
    	 acceleration = getThrottle();
@@ -357,7 +326,6 @@ public boolean onemore =false;
  	    
      }
      else {
-//     	System.out.println("shortlist !=null");
     	
 	    	 System.out.println("hi");
 	    	 for(int i=0; i<shortList.size()-1;i++) {
@@ -374,26 +342,6 @@ public boolean onemore =false;
      	
      }
      
-     
-// 	if(!getShortest) {
-// 			dpq = new DPQ(g.getNumOfPoints(),g); 
-//		     dpq.dijkstra(); 
-//		     shortList = dpq.printShortestPathTo(dpq.dst);
-//		     getShortest = true;
-//	     }
-// 	if(dpq!= null && shortList!=null && shortList.size()>1) {
-//	    	 System.out.println("here");
-//	    	 for(int i=0; i<shortList.size()-1;i++) {
-//	    		 System.out.println("in");
-//	    		 System.out.print("("+shortList.get(i).x+","+shortList.get(i).y+")"+"->"+"("+shortList.get(i+1).x+","+shortList.get(i+1).y+")");
-//	    		 System.out.println();
-//	    		 glBegin(GL_LINES);
-//		         glColor3f(1,0,1);
-//				 glVertex2f(shortList.get(i).x,shortList.get(i).y);
-//				 glVertex2f(shortList.get(i+1).x,shortList.get(i+1).y);
-//				 glEnd();
-//	    	 }
-//	     }
      
 	}
     static boolean onSegment(Point p, Point q, Point r) 
