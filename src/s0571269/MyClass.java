@@ -37,6 +37,7 @@ public class MyClass extends AI {
     Point checkpoint = info.getCurrentCheckpoint();
     Point prevCheckpoint;
     Graph g;
+    boolean debug = false;
 
     List<Point> shortList = null;
     boolean getShortest = true;
@@ -123,15 +124,16 @@ public class MyClass extends AI {
 		
 		
     	//now i=2 to avoid corner
-    	for(int i = 2 ; i <obs.length;i++) {
+    	for(int i = 0 ; i <obs.length;i++) {
 //    		allObsPoints[i] = new Vector2f[obs[i].npoints];
     		for(int j = 0; j<obs[i].npoints; j++) {
-    			//if is reflex vertex //leftoftest returns boolean, only keep middle 
-    			isReflexecke(obs[i],j);
-//    			obs[i].
-    			if(!isBoarder(obs[i],j)) {
-	    			g.addPoint(new Point(obs[i].xpoints[j],obs[i].ypoints[j]));
-	    		}
+    			//if is reflex vertex(not concave) add to node
+    			if(isReflexecke(obs[i],j)) {
+    				//then check outer border
+	    			if(!isBoarder(obs[i],j)) {
+		    			g.addPoint(new Point(obs[i].xpoints[j],obs[i].ypoints[j]));
+		    		}
+    			}
     		}
     	}
 	}
@@ -144,17 +146,45 @@ public class MyClass extends AI {
 
 	//** still not working well, get ang but when is ang over 
 	private boolean isReflexecke(Polygon ob, int j) {
-		//TODO not working yet
+	
 		//get two vectors from j to j-1 and j to j+1, get the smaller angle if middle to smaller angle is contained or intersect the obstacle, it's reflexive
+		
+		//first get angle bw three points with p1 as center
 		int prev = j>0? j-1:ob.npoints-1;
 		int next = j<ob.npoints-1? j+1:0;
-		Vector2f a = new Vector2f(ob.xpoints[j]-ob.xpoints[prev], ob.ypoints[j]-ob.ypoints[prev]);
-		Vector2f b = new Vector2f(ob.xpoints[j]-ob.xpoints[next], ob.ypoints[j]-ob.ypoints[next]);
-		double ang = Math.acos((a.x*b.x + a.y*b.y)/(Math.sqrt(a.x*a.x+a.y*a.y)*Math.sqrt(b.x*b.x+b.y*b.y)));
-//		System.out.println("ang:"+ang);//acos return 0 to 3.14
-		if(ang < Math.PI/2) {
-			return false;
+		Point p1 = new Point(ob.xpoints[j],ob.ypoints[j]);
+		Point p0 = new Point(ob.xpoints[prev],ob.ypoints[prev]);
+		Point p2 = new Point(ob.xpoints[next],ob.ypoints[next]);
+		float a = (p1.x-p0.x)*(p1.x-p0.x) + (p1.y-p0.y)*(p1.y-p0.y);
+		float b = (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y);
+		float c = (p2.x-p0.x)*(p2.x-p0.x) + (p2.y-p0.y)*(p2.y-p0.y);
+		float result = (float) (Math.acos( (a+b-c) / Math.sqrt(4*a*b) ) * 180/Math.PI);
+		//only returns 0-180
+		if(debug)
+			System.out.println("result: "+result);
+		
+		if(debug)
+			System.out.println("result: "+result);
+		double mx = (double)(p2.x+p0.x)/2;
+		double my = (double)(p2.y+p0.y)/2;
+		if(debug)
+			 System.out.println("mid: "+mx+","+my);
+		//get slope between mid and p1
+		double m = (double)((my-p1.y) / (mx-p1.x));
+		if(debug)
+			System.out.println("m: "+m);
+		//get center p1 to go slightly inward towards mid along the slope
+		int i =0;
+		if(mx < p1.x) {
+			i=-1;
 		}
+		double nx = (double)p1.x+i;
+		double ny =(double)(p1.y+(m *i));
+		if(debug)
+			System.out.println("new: "+nx+","+ny);
+		if(ob.contains(nx,ny))
+			return true;
+		//if concave, meaning we don't add it to graph node, return false
 		return false;
 	}
 
@@ -317,21 +347,17 @@ public boolean onemore =false;
     	 }
      }
      if(getShortest) {
-     	 System.out.println("get shortest");
  		 dpq = new DPQ(g.getNumOfPoints(),g); 
  	     dpq.dijkstra(); 
  	     shortList = dpq.printShortestPathTo(dpq.dst);
- 	     System.out.println(shortList.size());
+// 	     System.out.println(shortList.size());
  	     getShortest = false;
  	    
      }
      else {
-    	
-	    	 System.out.println("hi");
 	    	 for(int i=0; i<shortList.size()-1;i++) {
-		  		 System.out.println("in");
-		  		 System.out.print("("+shortList.get(i).x+","+shortList.get(i).y+")"+"->"+"("+shortList.get(i+1).x+","+shortList.get(i+1).y+")");
-		  		 System.out.println();
+//		  		 System.out.print("("+shortList.get(i).x+","+shortList.get(i).y+")"+"->"+"("+shortList.get(i+1).x+","+shortList.get(i+1).y+")");
+//		  		 System.out.println();
 		  		 glBegin(GL_LINES);
 		          glColor3f(1,0,1);
 		  		 glVertex2f(shortList.get(i).x,shortList.get(i).y);
