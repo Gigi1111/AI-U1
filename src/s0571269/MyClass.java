@@ -84,7 +84,7 @@ public class MyClass extends AI {
 		//first check if they belong to same obstacle
 		//to types of check  (1)contain(to check if it's two points from same obs) (2)intersect (to see if there's other obs in between)
 		
-		int k=0;
+//		int k=0;
 		for(int i = 0 ; i <obstacles.length;i++) {
 			
     		for(int j = 0; j<obstacles[i].npoints; j++) {
@@ -93,25 +93,30 @@ public class MyClass extends AI {
 				Point p2 = new Point(obstacles[i].xpoints[j],obstacles[i].ypoints[j]);
 				Point q2 = new Point(obstacles[i].xpoints[(j+1)%N],obstacles[i].ypoints[(j+1)%N]);
 				
-//				if((p1.equals(p2) && q1.equals(q2)) || (q1.equals(p2) && p1.equals(q2))) {
-//					k++;
-//					System.out.println("side "+k);
-////					return false;
-//				}
-				
-				//only checking line, not checking content
-				if(doIntersect(p1, q1, p2, q2)) { //&& !p1.equals(p2) && !p1.equals(q2) && !q1.equals(p2) && !q1.equals(q2)) {
-					return true;
-				}
-				
-				if(obstacles[i].contains(new Point((p1.x+q1.x)/2,(p1.y+q1.y)/2))) {
-					//but if they next to each other, it's fine
-//					System.out.println("contains");
+				//first check they are not next to each other
+				if(!p1.equals(p2) && !p1.equals(q2) && !q1.equals(p2) && !q1.equals(q2)) {
+					//only checking line, not checking content
+					if(doIntersect(p1, q1, p2, q2) ) {//&& !p1.equals(p2) && !p1.equals(q2) && !q1.equals(p2) && !q1.equals(q2)) {
+						return true;
+					}
+					// checking if mid point contain
+					if(obstacles[i].contains(new Point((p1.x+q1.x)/2,(p1.y+q1.y)/2))) 
+						return true;
 //					if((p1.equals(p2) && q1.equals(q2)) || (q1.equals(p2) && p1.equals(q2))) {
-//						
+//						k++;
+//						System.out.println("side "+k);
+////						return false;
 //					}
-//					else
-//						return true;
+					
+	//				if(obstacles[i].contains(new Point((p1.x+q1.x)/2,(p1.y+q1.y)/2))) {
+	//					//but if they next to each other, it's fine
+	////					System.out.println("contains");
+	////					if((p1.equals(p2) && q1.equals(q2)) || (q1.equals(p2) && p1.equals(q2))) {
+	////						
+	////					}
+	////					else
+	////						return true;
+	//				}
 				}
     		}
     	}

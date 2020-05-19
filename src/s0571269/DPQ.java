@@ -85,11 +85,17 @@ public class DPQ{
 	         // from the priority queue 
 	    	 if(debug)
 	    		 System.out.println("----while---");
-	         Point u = pq.remove().point; 
+	    	 
+	    	 Point u = null;
+	    	 if(pq.size()>0)
+	    		 u = pq.remove().point; 
+	    	 else {
+	    		 break;
+	    	 }
 	         if(debug) {
-	         printPq();
-	         System.out.println();
-	         System.out.println("u"+u.x+","+u.y);
+		         printPq();
+		         System.out.println();
+		         System.out.println("u"+u.x+","+u.y);
 	         }
 	         // adding the Edge whose distance is 
 	         // finalized 
