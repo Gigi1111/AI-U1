@@ -159,40 +159,51 @@ public class MyClass extends AI {
 		//first get angle bw three points with p1 as center
 		int prev = j>0? j-1:ob.npoints-1;
 		int next = j<ob.npoints-1? j+1:0;
-		Point p1 = new Point(ob.xpoints[j],ob.ypoints[j]);
-		Point p0 = new Point(ob.xpoints[prev],ob.ypoints[prev]);
+		Point p0 = new Point(ob.xpoints[j],ob.ypoints[j]);
+		Point p1 = new Point(ob.xpoints[prev],ob.ypoints[prev]);
 		Point p2 = new Point(ob.xpoints[next],ob.ypoints[next]);
-		float a = (p1.x-p0.x)*(p1.x-p0.x) + (p1.y-p0.y)*(p1.y-p0.y);
-		float b = (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y);
-		float c = (p2.x-p0.x)*(p2.x-p0.x) + (p2.y-p0.y)*(p2.y-p0.y);
-		float result = (float) (Math.acos( (a+b-c) / Math.sqrt(4*a*b) ) * 180/Math.PI);
-		//only returns 0-180
-		if(debug)
-			System.out.println("result: "+result);
-		
-		if(debug)
-			System.out.println("result: "+result);
-		double mx = (double)(p2.x+p0.x)/2;
-		double my = (double)(p2.y+p0.y)/2;
-		if(debug)
-			 System.out.println("mid: "+mx+","+my);
-		//get slope between mid and p1
-		double m = (double)((my-p1.y) / (mx-p1.x));
-		if(debug)
-			System.out.println("m: "+m);
-		//get center p1 to go slightly inward towards mid along the slope
-		int i =0;
-		if(mx < p1.x) {
-			i=-1;
-		}
-		double nx = (double)p1.x+i;
-		double ny =(double)(p1.y+(m *i));
-		if(debug)
-			System.out.println("new: "+nx+","+ny);
-		if(ob.contains(nx,ny))
+		Vector2f M = new Vector2f(p1.x-p0.x,p1.y-p0.y);
+		Vector2f C = new Vector2f(p2.x-p0.x,p2.y-p0.y);
+		double dot = Vector2f.dot(M,C);
+		double det = ((C.getX()*M.getY()) - (C.getY()*M.getX()));
+		double angle = Math.toDegrees(Math.atan2(det, dot));
+
+		System.out.println("ang: "+angle);
+		if(angle>0) {
 			return true;
-		//if concave, meaning we don't add it to graph node, return false
+		}
 		return false;
+//		float a = (p1.x-p0.x)*(p1.x-p0.x) + (p1.y-p0.y)*(p1.y-p0.y);
+//		float b = (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y);
+//		float c = (p2.x-p0.x)*(p2.x-p0.x) + (p2.y-p0.y)*(p2.y-p0.y);
+//		float result = (float) (Math.acos( (a+b-c) / Math.sqrt(4*a*b) ) * 180/Math.PI);
+//		//only returns 0-180
+//		if(debug)
+//			System.out.println("result: "+result);
+//		
+//		if(debug)
+//			System.out.println("result: "+result);
+//		double mx = (double)(p2.x+p0.x)/2;
+//		double my = (double)(p2.y+p0.y)/2;
+//		if(debug)
+//			 System.out.println("mid: "+mx+","+my);
+//		//get slope between mid and p1
+//		double m = (double)((my-p1.y) / (mx-p1.x));
+//		if(debug)
+//			System.out.println("m: "+m);
+//		//get center p1 to go slightly inward towards mid along the slope
+//		int i =0;
+//		if(mx < p1.x) {
+//			i=-1;
+//		}
+//		double nx = (double)p1.x+i;
+//		double ny =(double)(p1.y+(m *i));
+//		if(debug)
+//			System.out.println("new: "+nx+","+ny);
+//		if(ob.contains(nx,ny))
+//			return true;
+//		//if concave, meaning we don't add it to graph node, return false
+//		return false;
 	}
 
 	private float getAtan2(float cx, float cy, float x, float y) {
@@ -234,7 +245,7 @@ public class MyClass extends AI {
     //prev position is closer to checkpoint then currenct
     System.out.println("prev:"+prevPos.x+","+prevPos.y);
     int buffer = 0;
-    if(distance(prevPos,p)+buffer<distance(null,p)) {
+    if(distance(prevPos,p)+buffer<distance(null,p)) {// || distance(prevPos,p)==distance(null,p)) {
     	System.out.println("!!!!!!!!!!!!!init!!!!!!!");
     	initGraph();
     	listPointCounter=1;
