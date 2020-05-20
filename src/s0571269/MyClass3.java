@@ -17,7 +17,7 @@ import lenz.htw.ai4g.ai.AI;
 import lenz.htw.ai4g.ai.DriverAction;
 import lenz.htw.ai4g.track.Track;
 
-public class MyClass extends AI {
+public class MyClass3 extends AI {
 
     // max 1 min -1
     float angularAcc;
@@ -30,12 +30,11 @@ public class MyClass extends AI {
     float angularVelocity = info.getAngularVelocity(); // aktuelle Drehgeschwindigkeit
     int trackWidth = track.getWidth();
     int trackHeight = track.getHeight();
-
-    Point checkpoint = info.getCurrentCheckpoint();
-    float desiredSpeed = distance(checkpoint);
+    float desiredSpeed = distance();
     float currentSpeed = info.getVelocity().length();
-    float dist = distance(checkpoint);
+    float dist = distance();
     float acceleration;
+    Point checkpoint = info.getCurrentCheckpoint();
     Point prevCheckpoint;
     Graph g;
     boolean debug = false;
@@ -44,23 +43,18 @@ public class MyClass extends AI {
     boolean getShortest = true;
     DPQ dpq=null;
     
-    public boolean onemore =false;
-    int listPointCounter = 1;
-    
-    public MyClass(lenz.htw.ai4g.ai.Info info) {
+    public MyClass3(lenz.htw.ai4g.ai.Info info) {
 	   	 super(info);
 	   	 enlistForTournament(549481, 571269);
 	   	 //also get current checkpoint and current
 	   	prevCheckpoint = new Point(info.getCurrentCheckpoint());
 	   	initGraph();
-	   	onemore =false;
-	    listPointCounter = 1;
 	   	 
     }
-    float get_ori(Point p) {
+    float goal_ori() {
       	 return getAtan2(
-      			p.x,
-      			 p.y,
+      			 info.getCurrentCheckpoint().x,
+      			 info.getCurrentCheckpoint().y,
       			 info.getX(),
       			 info.getY()
       	 );
@@ -204,44 +198,27 @@ public class MyClass extends AI {
 
     @Override
     public String getName() {
-   	 return "XAEA-12";
+   	 return "Nadja&Fan";
     }
    
 
     
-
+public boolean onemore =false;
+    
     @Override
     public DriverAction update(boolean wasResetAfterCollision) {
 //    	System.out.println("update");
     if(info.getCurrentCheckpoint().x != prevCheckpoint.x || info.getCurrentCheckpoint().y != prevCheckpoint.y ) {
     	System.out.println("get graph again");
     	initGraph();
-    	listPointCounter=1;
+    	
     	drawShortestPath();
     	
 		prevCheckpoint = new Point(info.getCurrentCheckpoint());
     }
-    
-    Point p = info.getCurrentCheckpoint();
-    //when to go to next??
-    
-    if(shortList!=null) {
-    
-   	 p = shortList.get(listPointCounter);
-    	 if(distance(p)<20 && listPointCounter < shortList.size()-1 && !p.equals(info.getCurrentCheckpoint())) {
-    		 System.out.println("!!!!!!!!!!");
-    	    	listPointCounter++;
-    	    }
+   	 angularAcc = turnToCheckpoint();
 
-   	  System.out.println("goal:"+p);
-   	   System.out.println("pos:"+info.getX()+","+info.getY());
-   	   System.out.println("-----dist: "+distance(p)+"-i:"+listPointCounter+"---shlistsize:"+shortList.size()+"-----equals: "+p.equals(info.getCurrentCheckpoint())+"---");
-   	    	
-    }
-  
-    
-    angularAcc = turnToCheckpoint(p);
-  	 acceleration = getThrottle(p);
+   	 acceleration = getThrottle();
    	 for (int i = 0; i < obstacles.length; i++) {
    		 avoidObstacles(obstacles[i]);
    	 }
@@ -304,8 +281,8 @@ public class MyClass extends AI {
    	 return futurePos;
     }
 
-    private float getThrottle(Point p) {
-   	 float angle_off_target = info.getOrientation() - get_ori(p);
+    private float getThrottle() {
+   	 float angle_off_target = info.getOrientation() - goal_ori();
    	 if (Math.abs(angle_off_target) < 0.02) {
    		 return 1f;
    	 } else {
@@ -313,27 +290,27 @@ public class MyClass extends AI {
    	 }
     }
 
-    private float distance(Point p) {
-   	 Point goal = p;
+    private float distance() {
+   	 Point goal = info.getCurrentCheckpoint();
    	 float dist = (float) Math.sqrt(Math.pow(goal.x - info.getX(), 2) + Math.pow(goal.y - info.getY(), 2));
    	 return dist;
     }
 
-    private float turnToCheckpoint(Point p) {
+    private float turnToCheckpoint() {
    	 float frictionValue = 1.f;
    	 float currentAcceleration = 0f;
    	 float currentDirection = info.getOrientation();
-   	 float angleDifference = get_ori(p) - currentDirection;
+   	 float angleDifference = goal_ori() - currentDirection;
    	 
    	 //make sure we turn the smaller circle
    	 if(Math.abs(angleDifference) > Math.PI) {
-   		angleDifference = (float)(Math.PI - Math.abs(get_ori(p)) + (Math.PI-Math.abs(currentDirection)));
+   		angleDifference = (float)(Math.PI - Math.abs(goal_ori()) + (Math.PI-Math.abs(currentDirection)));
    		//make sure turning towards goal direction 
-   		if(get_ori(p)>0 && currentDirection<0) {
+   		if(goal_ori()>0 && currentDirection<0) {
    			angleDifference = -angleDifference;
    		 }
    	 }
-//   	 System.out.println("goal_ori: " + get_ori(info.getCurrentCheckpoint()) + " currentDirectoion: " + currentDirection+" angleDIff: "+angleDifference);
+//   	 System.out.println("goal_ori: " + goal_ori() + " currentDirectoion: " + currentDirection+" angleDIff: "+angleDifference);
    	 
    	 float frictionAcceleration = (- info.getAngularVelocity()) * frictionValue;
    	 
