@@ -30,11 +30,11 @@ public class MyClass extends AI {
     float angularVelocity = info.getAngularVelocity(); // aktuelle Drehgeschwindigkeit
     int trackWidth = track.getWidth();
     int trackHeight = track.getHeight();
-
+    Point currentPos = new Point((int)info.getX(),(int)info.getY());
     Point checkpoint = info.getCurrentCheckpoint();
-    float desiredSpeed = distance(checkpoint);
+    float desiredSpeed = distance(currentPos, checkpoint);
     float currentSpeed = info.getVelocity().length();
-    float dist = distance(checkpoint);
+    float dist = distance(currentPos, checkpoint);
     float acceleration;
     Point prevCheckpoint;
     Graph g;
@@ -47,6 +47,7 @@ public class MyClass extends AI {
     public boolean onemore =false;
     int listPointCounter = 1;
     
+    Point prevPos = null;
     public MyClass(lenz.htw.ai4g.ai.Info info) {
 	   	 super(info);
 	   	 enlistForTournament(549481, 571269);
@@ -55,7 +56,7 @@ public class MyClass extends AI {
 	   	initGraph();
 	   	onemore =false;
 	    listPointCounter = 1;
-	   	 
+	    prevPos = new Point((int)info.getX(),(int)info.getY());	   	 
     }
     float get_ori(Point p) {
       	 return getAtan2(
@@ -207,35 +208,50 @@ public class MyClass extends AI {
    	 return "XAEA-12";
     }
    
-
-    
+    int i=0;
+   
 
     @Override
     public DriverAction update(boolean wasResetAfterCollision) {
 //    	System.out.println("update");
+    
+    i++;
+    if(i%10==0) {
+    	i=0;
+    	prevPos = new Point((int)info.getX(),(int)info.getY());
+    }
     if(info.getCurrentCheckpoint().x != prevCheckpoint.x || info.getCurrentCheckpoint().y != prevCheckpoint.y ) {
     	System.out.println("get graph again");
     	initGraph();
     	listPointCounter=1;
-    	drawShortestPath();
-    	
 		prevCheckpoint = new Point(info.getCurrentCheckpoint());
     }
     
     Point p = info.getCurrentCheckpoint();
-    //when to go to next??
+    
+    
+  //check if getting further away, init again
+    //prev position is closer to checkpoint then currenct
+    System.out.println("prev:"+prevPos.x+","+prevPos.y);
+    int buffer = 0;
+    if(distance(prevPos,p)+buffer<distance(null,p)) {
+    	System.out.println("!!!!!!!!!!!!!init!!!!!!!");
+    	initGraph();
+    	listPointCounter=1;
+    	
+    }
     
     if(shortList!=null) {
     
    	 p = shortList.get(listPointCounter);
-    	 if(distance(p)<20 && listPointCounter < shortList.size()-1 && !p.equals(info.getCurrentCheckpoint())) {
+    	 if(distance(null,p)<20 && listPointCounter < shortList.size()-1 && !p.equals(info.getCurrentCheckpoint())) {
     		 System.out.println("!!!!!!!!!!");
     	    	listPointCounter++;
     	    }
 
    	  System.out.println("goal:"+p);
    	   System.out.println("pos:"+info.getX()+","+info.getY());
-   	   System.out.println("-----dist: "+distance(p)+"-i:"+listPointCounter+"---shlistsize:"+shortList.size()+"-----equals: "+p.equals(info.getCurrentCheckpoint())+"---");
+   	   System.out.println("-----dist: "+distance(null,p)+"-i:"+listPointCounter+"---shlistsize:"+shortList.size()+"-----equals: "+p.equals(info.getCurrentCheckpoint())+"---");
    	    	
     }
   
@@ -248,11 +264,7 @@ public class MyClass extends AI {
    	 return new DriverAction(acceleration, angularAcc);
     }
     
-    
-    private void drawShortestPath() {
-    	
-		
-	}
+
 	private void initGraph() {
 		getShortest = true;
     	g = new Graph(new Point((int)info.getX(),(int)info.getY()),info.getCurrentCheckpoint());
@@ -313,9 +325,12 @@ public class MyClass extends AI {
    	 }
     }
 
-    private float distance(Point p) {
-   	 Point goal = p;
-   	 float dist = (float) Math.sqrt(Math.pow(goal.x - info.getX(), 2) + Math.pow(goal.y - info.getY(), 2));
+    private float distance(Point p, Point g) {
+   	 Point goal = g;
+   	 if(p==null)
+   		 p = new Point((int)info.getX(),(int)info.getY());
+   	 Point p0 = p;
+   	 float dist = (float) Math.sqrt(Math.pow(goal.x - p0.x, 2) + Math.pow(goal.y - p0.y, 2));
    	 return dist;
     }
 
