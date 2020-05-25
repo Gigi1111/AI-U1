@@ -6,7 +6,11 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/chung-fantsai/eclipse-workspace/try2/lib/native"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Users/chung-fantsai/eclipse-workspace/AI_U1/lib/ai_libs.jar"/>
-	<classpathentry kind="lib" path="/Users/chung-fantsai/eclipse-workspace/AI_U1/lib/ai.jar"/>
+	<classpathentry kind="lib" path="C:/Users/killi/Desktop/GT_AI/ai-libs/ai_libs.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/killi/Desktop/GT_AI/ai-libs/native"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/killi/Desktop/GT_AI/ai.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
