@@ -33,7 +33,7 @@ public class MySuperClass extends AI {
 	private Grid grid = new Grid(track.getHeight(), track.getWidth(), obstacles);
 	private Graph graph;
 	private ArrayList<Point> shortestWay;
-	private Graph freeSpaceGraph;
+
 
 
 	public MySuperClass(lenz.htw.ai4g.ai.Info info) {
@@ -42,7 +42,7 @@ public class MySuperClass extends AI {
 
 		oldCheckpointX = info.getCurrentCheckpoint().getX();
 		oldCheckpointY = info.getCurrentCheckpoint().getY();
-		freeSpaceGraph  =  grid.getGraph();
+		graph  =  grid.getGraph();
 		
 
 		// calculate free space once
@@ -62,7 +62,7 @@ public class MySuperClass extends AI {
 			//getshortestway
 			Point startPoint = new Point((int)info.getX(), (int)info.getY());
 			Point currentCheckP = new Point((int)info.getCurrentCheckpoint().x, (int)info.getCurrentCheckpoint().y);
-			pathFinder = new PathFinder(freeSpaceGraph);
+			pathFinder = new PathFinder(graph);
 			
 			oldCheckpointX = info.getCurrentCheckpoint().getX();
 			oldCheckpointY = info.getCurrentCheckpoint().getY();		
@@ -155,14 +155,24 @@ public class MySuperClass extends AI {
 	@Override
 	public void doDebugStuff() {
 		
-		ArrayList<Point> freeSpace = new ArrayList<>();
-		freeSpace = graph.getAllNodes();
+		int cellSize = 30;
+		ArrayList<Point> freespace = new ArrayList<>(graph.getAllNodes());
+		for (Point point : freespace ) {
+			glBegin(GL_QUADS);
+			glColor3f(1, 0, 0);
+			glVertex2f(point.x, point.y);
+			glVertex2d(point.x + cellSize, point.y);
+			glVertex2d(point.x + cellSize, point.y + cellSize);
+			glVertex2d(point.x, point.y + cellSize );
+			glEnd();
+		}
 		
-		for (Point point : freeSpace) {
+		ArrayList<Point> bestWay = new ArrayList<>(graph.getAllNodes());
+		for (Point point : freespace ) {
 			glBegin(GL_LINES);
 			glColor3f(1, 0, 0);
-			glVertex2f(info.getX(), info.getY());
-			glVertex2d(info.getCurrentCheckpoint().getX(), info.getCurrentCheckpoint().getY());
+			glVertex2f(point.x, point.y);
+			glVertex2f(point.x, point.y);
 			glEnd();
 		}
 

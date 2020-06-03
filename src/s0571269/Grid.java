@@ -5,7 +5,7 @@ import java.awt.Polygon;
 
 public class Grid {
 	
-	private int cellSize = 5;
+	private int cellSize = 30;
 	private int gridHeight;
 	private int gridWidth;
 	private boolean freeCells[][];
@@ -30,7 +30,7 @@ public class Grid {
 					y = j * cellSize;
 					int middle = cellSize / 2;
 					for (int k = 0; k < obstacles.length; k++) {
-						isCellFree = obstacle[k].intersects(x, y, cellSize, cellSize);
+						isCellFree = !(obstacle[k].intersects(x, y, cellSize, cellSize));
 						if (isCellFree) {
 							freeCells[i][j] = true;
 						}
