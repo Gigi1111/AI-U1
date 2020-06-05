@@ -27,53 +27,87 @@ public class MySuperClass extends AI {
 	float currentSpeed = info.getVelocity().length();
 	float acceleration;
 	Point checkpoint = info.getCurrentCheckpoint();
-	private double oldCheckpointX;
-	private double oldCheckpointY;
-	private PathFinder pathFinder;;
-	private Grid grid = new Grid(track.getHeight(), track.getWidth(), obstacles);
+	Point lastCheckpoint;
+	private PathFinder pathFinder;
+	private Grid grid;
 	private Graph graph;
-	private ArrayList<Point> shortestWay;
-
-
+	private ArrayList<Point> currentPath = new ArrayList<>();
+	private PathOptimizer pathOptimizer = new PathOptimizer();
+	private int cellSize = 20;
+	private Point spawnPoint;
 
 	public MySuperClass(lenz.htw.ai4g.ai.Info info) {
 		super(info);
 		enlistForTournament(549481, 571269);
-
-		oldCheckpointX = info.getCurrentCheckpoint().getX();
-		oldCheckpointY = info.getCurrentCheckpoint().getY();
+		grid = new Grid(track.getHeight(), track.getWidth(), obstacles, cellSize);
 		graph  =  grid.getGraph();
-		
-
-		// calculate free space once
+		pathFinder = new PathFinder(graph);
+		spawnPoint = new Point(500, 500);
+		lastCheckpoint = null;
 	}
 
 	@Override
 	public DriverAction update(boolean wasResetAfterCollision) {
 		Point targetPoint;
-		int lastCheckPointX = 0, lastCheckpointY = 0;
-
-		// nach coolision beachten wieder erster checkpoint
-		if (info.getCurrentCheckpoint().x != lastCheckPointX || info.getCurrentCheckpoint().y != lastCheckpointY) {
+		
+		if (waypointReached()) {
+			selectNextWaypoint();
+		}
+		
+		if (hasExploded()) {
+			System.out.println("boom");
+			calculatePath();			
 		}
 
-		if (oldCheckpointX == info.getCurrentCheckpoint().getX()
-				&& oldCheckpointY == info.getCurrentCheckpoint().getY()) {
-			//getshortestway
-			Point startPoint = new Point((int)info.getX(), (int)info.getY());
-			Point currentCheckP = new Point((int)info.getCurrentCheckpoint().x, (int)info.getCurrentCheckpoint().y);
-			pathFinder = new PathFinder(graph);
-			
-			oldCheckpointX = info.getCurrentCheckpoint().getX();
-			oldCheckpointY = info.getCurrentCheckpoint().getY();		
+		if (checkpointHasChanged()) {
+			onCheckpointChange();
 		}
+		
 		targetPoint = getNextWaypoint();
 		angularAcc = turnToPoint(targetPoint);
 		acceleration = getThrottle(targetPoint);
-		// for (int i = 0; i < obstacles.length; i++) {
-		// avoidObstacles(obstacles[i]);
-		// }
 		return new DriverAction(acceleration, angularAcc);
+	}
+
+	private boolean hasExploded() {
+		return getCurrentLocation().equals(spawnPoint);
+	}
+
+	private void selectNextWaypoint() {
+		if (! (this.currentPath == null) && !this.currentPath.isEmpty()) {
+			this.currentPath.remove(0);
+		}
+	}
+
+	private boolean waypointReached() {
+		return this.grid.pointToNode(getCurrentLocation()).equals(
+				this.grid.pointToNode(getNextWaypoint())
+				);
+	}
+
+	private void onCheckpointChange() {
+		if (this.lastCheckpoint != null) {
+			this.spawnPoint = new Point(this.lastCheckpoint);
+		}
+		calculatePath();
+		this.lastCheckpoint = new Point(info.getCurrentCheckpoint());
+	}
+	
+	private void calculatePath() {
+		Point currentNode = this.grid.pointToNode(getCurrentLocation());
+		Point targetNode = this.grid.pointToNode(info.getCurrentCheckpoint());
+		currentPath = this.pathFinder.getShortestWay(currentNode, targetNode);
+		if (currentPath == null || currentPath.isEmpty()) {
+			System.out.println("WARNING: Could not calculate path");
+		} else {
+			System.out.println("INFO: Calculated new path");
+		}
+		// currentPath = this.pathOptimizer.optimize(currentPath);
+	}
+
+	private boolean checkpointHasChanged() {
+		Point currentCheckpoint = info.getCurrentCheckpoint();
+		return ! currentCheckpoint.equals(lastCheckpoint);
 	}
 
 	@Override
@@ -126,6 +160,7 @@ public class MySuperClass extends AI {
 		}
 		currentAcceleration = currentAcceleration + (Math.signum(angleDifference) * 1.f);
 		return currentAcceleration + frictionAcceleration;
+	
 	}
 
 	private float getGoalOrientation(Point targetPoint) {
@@ -134,16 +169,17 @@ public class MySuperClass extends AI {
 	}
 	
 	private Point getNextWaypoint() {
-		boolean carInCellOfCheckpoint = this.grid.isSameCell(getCurrentLocation(), info.getCurrentCheckpoint());
-		if (carInCellOfCheckpoint) {
+		if (this.currentPath == null || this.currentPath.isEmpty()) {
 			return info.getCurrentCheckpoint();
 		} else {
-			ArrayList<Point> path;
-			Point currentLocation = getCurrentLocation();
-			Point targetNode = this.grid.pointToNode(info.getCurrentCheckpoint());
-			path = this.pathFinder.getShortestWay(currentLocation, targetNode);
-			return path.get(0);
-		} 
+			return this.currentPath.get(0);
+		}
+	}
+
+	private void drawPath() {
+		for (Point point : currentPath) {
+			this.drawRectangle(point.x - 3, point.y - 3, 6, 6, 0, 1, 0);
+		}
 	}
 
 	private Point getCurrentLocation() {
@@ -152,34 +188,51 @@ public class MySuperClass extends AI {
 		return point;
 	}
 
-	@Override
-	public void doDebugStuff() {
-		
-		int cellSize = 30;
+	public void drawRectangle(int x, int y, int width, int height, float red, float green, float blue) {
+		glBegin(GL_QUADS);
+		glColor3f(red, green, blue);
+		glVertex2f(x, y);
+		glVertex2d(x + width, y);
+		glVertex2d(x + width, y + height);
+		glVertex2d(x, y + height);
+		glEnd();		
+	}
+	
+	private void drawGrid() {
 		ArrayList<Point> freespace = new ArrayList<>(graph.getAllNodes());
 		for (Point point : freespace ) {
-			glBegin(GL_QUADS);
-			glColor3f(1, 0, 0);
-			glVertex2f(point.x, point.y);
-			glVertex2d(point.x + cellSize, point.y);
-			glVertex2d(point.x + cellSize, point.y + cellSize);
-			glVertex2d(point.x, point.y + cellSize );
-			glEnd();
+			drawRectangle(point.x - cellSize/2 + 1, point.y - cellSize/2 + 1, cellSize - 2, cellSize -2, 1, 0, 0);
 		}
+	}
+	
+	@Override
+	public void doDebugStuff() {
+		drawGrid();
+		drawNeighbours();
+		drawPath();
 		
-		ArrayList<Point> bestWay = new ArrayList<>(graph.getAllNodes());
-		for (Point point : freespace ) {
-			glBegin(GL_LINES);
-			glColor3f(1, 0, 0);
-			glVertex2f(point.x, point.y);
-			glVertex2f(point.x, point.y);
-			glEnd();
-		}
-
 		glBegin(GL_LINES);
 		glColor3f(0, 0, 1);
 		glVertex2f(info.getX(), info.getY());
 		glVertex2d(info.getCurrentCheckpoint().getX(), info.getCurrentCheckpoint().getY());
+		glEnd();
+	}
+
+	private void drawNeighbours() {
+		for (Point cell: new ArrayList<Point>(graph.getAllNodes())) {
+			for (Point neighbour : this.graph.getNeighbours(cell)) {
+				drawLine(cell, neighbour, 1.f, 0.f, 0.f);
+				
+			}
+		}
+		
+	}
+
+	private void drawLine(Point s, Point t, float r, float g, float b) {
+		glBegin(GL_LINES);
+		glColor3f(r, g, b);
+		glVertex2f(s.x, s.y);
+		glVertex2d(t.x, t.y);
 		glEnd();
 	}
 

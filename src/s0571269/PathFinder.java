@@ -6,13 +6,14 @@ import java.util.HashMap;
 
 public class PathFinder {
 	
-	private float infinity = -1.f;
+	private final float infinity = 99999999999.f;
 
 	private Graph graph;
 	
 	private HashMap<Point, Float> distances;
 	private ArrayList<Point> unvisited;
 	private ArrayList<Point> visited;
+	private HashMap<Point, Point> shortestApproach;
 
 	public PathFinder(Graph graph) {
 		this.graph = graph;
@@ -20,6 +21,7 @@ public class PathFinder {
 	
 	public ArrayList<Point> getShortestWay(Point start, Point destination) {
 		visited = new ArrayList<Point>();
+		shortestApproach = new HashMap<>();
 		float currentDistance = 0;
 		Point currentPoint = start;
 		distances = new HashMap<>();
@@ -30,28 +32,46 @@ public class PathFinder {
 			distances.put(node, infinity);
 		}
 		distances.put(start, 0.f);
-		while (unvisited.contains(destination) && unvisitedPointsReachable()) {
+		while (!currentPoint.equals(destination)) {
 			for (Point neighbour : graph.getNeighbours(currentPoint)) {
 				if (unvisited.contains(neighbour)) {
-					float tentativeDistance = 1 + currentDistance;
+					float distanceToCurrentPoint = (float) currentPoint.distance(neighbour);
+					float tentativeDistance = distanceToCurrentPoint + currentDistance;
 					float previousDistance = distances.get(neighbour);
 					if (previousDistance == infinity || previousDistance > tentativeDistance) {
 						distances.put(neighbour, tentativeDistance);
+						shortestApproach.put(neighbour, currentPoint);
 					}
 				}
 			}
 			unvisited.remove(currentPoint);
 			visited.add(currentPoint);
 			currentPoint = selectClosestNode();
-			if (currentPoint == null) {
-				break;
+			if (currentPoint == null || !unvisitedPointsReachable()) {
+				return null;
+			} else {
+				currentDistance = distances.get(currentPoint);
 			}
 		}
-    	visited.remove(0);
-    	return visited;
+    	return generateShortestPath(start, destination);
 
 	}
 	
+	private ArrayList<Point> generateShortestPath(Point start, Point destination) {
+		ArrayList<Point> path = new ArrayList<>();
+		Point currentPoint = destination;
+		path.add(destination);
+		while (! currentPoint.equals(start)) {
+			currentPoint = this.shortestApproach.get(currentPoint);
+			if (currentPoint == null) {
+				System.out.println("yo");
+			}
+			path.add(0, currentPoint);
+			
+		}
+		return path;
+	}
+
 	private Point selectClosestNode() {
 		if (unvisited.isEmpty()) {
 			return null;
@@ -92,6 +112,7 @@ public class PathFinder {
 		PathFinder pathfinder = new PathFinder(graph);
 		ArrayList<Point> path = pathfinder.getShortestWay(start, destination);
 		ArrayList<Point> expectedPath = new ArrayList<Point>();
+		expectedPath.add(start);
 		expectedPath.add(middle);
 		expectedPath.add(destination);
 		if (path.equals(expectedPath)) {

@@ -46,6 +46,19 @@ public class Graph {
 		return nodesCopy;
 	}
     
+	public static void main(String[] args) {
+		Graph g = new Graph();
+		g.addNode(new Point(1,2));
+		
+		ArrayList<Point> nodes = g.getAllNodes();
+		nodes.remove(0);
+		nodes = g.getAllNodes();
+		if (nodes.size() == 1) {
+			System.out.println("ok");
+		} else {
+			System.out.println("ERROR");
+		}
+	}
     
        
 }
