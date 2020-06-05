@@ -63,6 +63,7 @@ public class DPQ{
 	 // Function for Dijkstra's Algorithm 
 	 public void dijkstra() 
 	 { 
+		 long startTime = System.nanoTime();
 	     for (Map.Entry<Point,List<Edge>> entry : g.adjVertices.entrySet()) {
 	    	 dist.putIfAbsent(entry.getKey(),Float.MAX_VALUE);
 	    		weg.putIfAbsent(entry.getKey(),new ArrayList<Point>());
@@ -104,6 +105,9 @@ public class DPQ{
 	        	 System.out.println("setteled:"+settled);
 	         e_Neighbours(u); 
 	     } 
+	     long endTime = System.nanoTime();
+	     long totalTime = endTime - startTime;
+	     System.out.println("-------------total time---------"+totalTime);
 	 } 
 	
 	 // Function to process all the neighbours  
@@ -113,7 +117,7 @@ public class DPQ{
 	     float edgeDistance = -1; 
 	     float newDistance = -1; 
 
-	     for (Edge v:g.getEdgeList(u)) { 
+	     for (Edge v: g.getEdgeList(u)) { 
 	    	
 	    	 if(debug) {
 	    	 printWeg();
@@ -133,7 +137,17 @@ public class DPQ{
 	            	 System.out.println("u/v:"+"("+u.x+","+u.y+")"+"("+v.point.x+","+v.point.y+")"+"edgeDist:"+edgeDistance+", newDist"+newDistance+", distOfV:"+dist.get(v.point));
 	
 	             // If new distance is cheaper in cost 
-	             if (newDistance < dist.get(v.point)) {
+//	             if(v.point==null) {
+//	            	 System.out.println("v.point");
+//	             }
+//	             else if(dist.get(v.point)==null) {
+//	            	 System.out.println("u: "+u);
+//	            	 System.out.println("edge list size of u: "+g.getEdgeList(u).size());
+//	            	 System.out.println("v.point: "+v.point);
+//	            	 System.out.println("dist: "+dist);
+//	            	 System.out.println("dist.get(v.point)");
+//	             }
+	             if (dist.containsKey(v.point) && dist.get(v.point)!=null&& newDistance < dist.get(v.point)) {
 	                 dist.replace(v.point,newDistance);
 	                 if(!v.equals(src))
 	                	 weg.replace(v.point,newl);
@@ -146,7 +160,9 @@ public class DPQ{
 	            	 printDist();
 	             
 	             // Add the current Edge to the queue 
-	             pq.add(new Edge(v.point, dist.get(v.point))); 
+	             if (dist.containsKey(v.point) && dist.get(v.point)!=null){
+	            	 pq.add(new Edge(v.point, dist.get(v.point))); 
+	             }
 	             if(debug) {
 	             printPq();
 	             System.out.println("----");
@@ -160,7 +176,8 @@ public class DPQ{
 		 }
 		 List<Point> li = weg.get(p);
 		 if(li!=null && !li.isEmpty() ) {
-			 System.out.print("Shortest weg: ");
+			 if(debug)
+				 System.out.print("Shortest weg: ");
 			 for(Point pp : li) {
 				 System.out.print("("+pp.x+","+pp.y+")"+"->");
 			 }
@@ -172,98 +189,4 @@ public class DPQ{
 			 return null;
 		 }
 	 }
-//	 public static void main(String arg[]) 
-//	 { 
-//	     int V = 5; //number of nodes
-////	     Point source = 0; 
-//	
-//	     // Adjacency list representation of the  
-//	     // connected edges 
-////	     //src, dest
-////	     Point p0 = new Point(0,0);
-////	     Point p1 = new Point(0,1);
-////	     Point p2 = new Point(0,2);
-////	     Point p3 = new Point(0,3);
-////	     Point p4 = new Point(0,4);
-////	     Graph g = new Graph(p0,p4); 
-////	
-////	     // Initialize list for every node 
-////	    g.addPoint(p0);
-////	    g.addPoint(p1);
-////	    g.addPoint(p2);
-////	    g.addPoint(p3);
-////	    g.addPoint(p4);
-////	   
-////	     // Inputs for the DPQ graph 
-////	    g.addEdge(p0,p3);
-////	    g.addEdge(p0,p1);
-////	    g.addEdge(p1,p2);
-////	    g.addEdge(p2,p3);
-////	    g.addEdge(p1,p3);
-////	    g.addEdge(p2,p4);
-////	    g.addEdge(p1,p4);
-//
-//	     //src, dest
-//	     Point p0 = new Point(0,0);
-//	     Point p1 = new Point(0,10);
-//	     Point p2 = new Point(10,0);
-//	     Point p3 = new Point(10,10);
-//	     
-//	     Point p4 = new Point(2,2);
-//	     Point p5 = new Point(2,8);
-//	     Point p6 = new Point(8,2);
-//	     Point p7 = new Point(8,8);
-//	     
-//	     Point p8 = new Point(9,9);
-//	     Graph g = new Graph(p0,p8); 
-//	
-//	     // Initialize list for every node 
-//	    g.addPoint(p0);
-//	    g.addPoint(p1);
-//	    g.addPoint(p2);
-//	    g.addPoint(p3);
-//	    g.addPoint(p4);
-//	    g.addPoint(p5);
-//	    g.addPoint(p6);
-//	    g.addPoint(p7);
-//	    g.addPoint(p8);
-//	   
-//	    g.addEdge(p2,p5);
-//	    g.addEdge(p0,p4);
-//	    g.addEdge(p6,p1);
-//	    g.addEdge(p3,p7);
-//	    g.addEdge(p0,p5);
-//	    g.addEdge(p0,p6);
-//	    g.addEdge(p5,p4);
-//	    g.addEdge(p4,p6);
-//	    g.addEdge(p7,p6);
-//	    g.addEdge(p8,p3);
-//	    g.addEdge(p8,p2);
-//	    g.addEdge(p8,p1);
-//	    g.addEdge(p8,p7);
-//	    g.addEdge(p8,p5);
-//	    g.addEdge(p8,p6);
-//	    
-//	    g.printGraph();
-//	    
-//	    
-//	     // Calculate the single source shortest path 
-//	     DPQ dpq = new DPQ(4,g); 
-//	     dpq.dijkstra(); 
-//	
-//	     // Print the shortest path to all the nodes 
-//	     // from the source node 
-//	     System.out.println("The shorted path from node :"); 
-////	     System.out.print("dist:");
-////         for(Map.Entry<Point, Float> entry:dpq.dist.entrySet()) {
-////        	 System.out.print("("+entry.getKey().x+","+entry.getKey().y+")"+"[dist:"+entry.getValue()+"]");
-////         }
-//         System.out.println();
-//         printShortestPathTo(p8);
-//	     for ( Map.Entry<Point,Float> entry:dpq.dist.entrySet()) 
-//	         System.out.println("("+p0.x+","+p0.y+")" + " to " +  "("+entry.getKey().x+","+entry.getKey().y+")"
-//	        		 				+ " is "
-//	                            + entry.getValue()); 
-//	     //and is how??
-//	 }
 }

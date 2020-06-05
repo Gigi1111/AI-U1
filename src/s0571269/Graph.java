@@ -6,15 +6,30 @@ import java.util.*;
 public class Graph {
 	public static boolean debug = false;
 	public int numOfPoints = 0;
-	public Point source;
-	public Point destination;
+	public Point source=null;
+	public Point destination=null;
     public Map<Point, List<Edge>> adjVertices;
     Graph(Point s, Point d){
     	adjVertices = new HashMap<Point, List<Edge>>();
     	source = new Point(s);
     	destination = new Point(d);
     }
+    Graph(){
+    	adjVertices = new HashMap<Point, List<Edge>>();
+//    	source = new Point(s);
+//    	destination = new Point(d);
+    }
     void addPoint(Point p) {
+    	if(getEdgeList(p)==null)
+    		adjVertices.put(new Point(p), new ArrayList<Edge>());
+    }
+    void addSrc(Point p) {
+    	source = p;
+    	if(getEdgeList(p)==null)
+    		adjVertices.put(new Point(p), new ArrayList<Edge>());
+    }
+    void addDes(Point p) {
+    	destination = p;
     	if(getEdgeList(p)==null)
     		adjVertices.put(new Point(p), new ArrayList<Edge>());
     }
@@ -35,10 +50,79 @@ public class Graph {
     	numOfPoints = i;
 		return numOfPoints;
     }
+    boolean removeSrc() {
+    	System.out.println("====================in remove src====================");
+    	System.out.println("n of points before:"+getNumOfPoints());
+    	//get neighbors of source
+    	List<Edge> srcNeighbor = adjVertices.get(source);
+    	 adjVertices.remove(source);
+        System.out.println("n of points after:"+getNumOfPoints());
+        //remove edges with source
+        	
+        
+        for (Edge neighborEdge : srcNeighbor) {
+        	if(neighborEdge !=null && neighborEdge.point!=null && adjVertices.containsKey(neighborEdge.point)) {
+        	
+        	
+	        	List<Edge> edgesOfNeigh = adjVertices.get(neighborEdge.point);
+	        	//find the edge that contains src
+	        	 System.out.println("n of edges of Neigh "+ neighborEdge.point+":"+ edgesOfNeigh.size());
+	        	 int counter = 0;
+	          	for (Edge e : edgesOfNeigh) {
+	          	 if(e.containsPoint(source)) {
+	          		 break;
+	          	 }
+	          	 counter++;
+	          	}
+	          	if(counter< edgesOfNeigh.size())
+	          		edgesOfNeigh.remove(counter);
+	        	 System.out.println("n of edges of Neigh "+ neighborEdge.point+" after remove :"+ edgesOfNeigh.size());
+        	}
+        	
+        }
+        	
+        		    
+        System.out.println("====================donone removing source====================");
+        
+        source = null;
+        return true;
+        
+    }
+    boolean removeDes() {
+    	System.out.println("====================in remove des====================");
+    	System.out.println("n of points before:"+getNumOfPoints());
+    	List<Edge> srcNeighbor = adjVertices.get(destination);
+	 adjVertices.remove(destination);
+     System.out.println("n of points after:"+getNumOfPoints());
+     
+     
+     for (Edge neighborEdge : srcNeighbor) {
+     	List<Edge> edgesOfNeigh = adjVertices.get(neighborEdge.point);
+     	//find the edge that contains src
+     	 System.out.println("n of edges of Neigh "+ neighborEdge.point+":"+ edgesOfNeigh.size());
+     	 //can't remove all the edges, just one
+     	int counter = 0;
+     	for (Edge e : edgesOfNeigh) {
+     	 if(e.containsPoint(destination)) {
+     		 break;
+     	 }
+     	 counter++;
+     	}
+     	if(counter< edgesOfNeigh.size())
+     		edgesOfNeigh.remove(counter);
+     	 System.out.println("n of edges of Neigh "+ neighborEdge.point+" after remove :"+ edgesOfNeigh.size());
+     	
+     }
+     
+     		 System.out.println("====================donone removing des====================");
+     
+     destination = null;
+     return true;
+    }
     void removePoint(Point p) {
-        Point v = new Point(p);
-        adjVertices.values().stream().forEach(e -> e.remove(v));
+        adjVertices.values().stream().forEach(e -> e.remove(p));
         adjVertices.remove(new Point(p));
+        
     }
     void addEdge(Point p1, Point p2) {
         Edge e1 = new Edge(new Point(p1),dist(p1,p2));
