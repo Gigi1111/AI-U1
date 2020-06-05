@@ -136,31 +136,23 @@ public class MySuperClass extends AI {
 		if (Math.abs(angle_off_target) < 0.2) {
 			return 1f;
 		} else {
-			return 0.5f;
+			return 0.01f;
 		}
 	}
 
 	private float turnToPoint(Point targetPoint) {
-		float frictionValue = 1.f;
-		float currentAcceleration = 0f;
-		float currentDirection = info.getOrientation();
-		float angleDifference = getGoalOrientation(targetPoint) - currentDirection;
-		if (Math.abs(angleDifference) > Math.PI) {
-			angleDifference = (float) (Math.PI - Math.abs(getGoalOrientation(targetPoint))
-					+ (Math.PI - Math.abs(currentDirection)));
-			if (getGoalOrientation(targetPoint) > 0 && currentDirection < 0) {
-				angleDifference = -angleDifference;
-			}
+		float orientationDifference = info.getOrientation() - getGoalOrientation(targetPoint);
+		if (orientationDifference >= 0.001) {
+			return 0.f;
+		} else if (info.getAngularVelocity() < 0.1f) {
+			return info.getMaxAbsoluteAngularAcceleration() * Math.signum(orientationDifference);
 		}
-
-		float frictionAcceleration = (-info.getAngularVelocity()) * frictionValue;
-		if ((Math.abs(angleDifference) < 0.2)
-				&& (Math.abs(info.getAngularVelocity()) > info.getMaxAbsoluteAngularVelocity() * 0.3f)) {
-			currentAcceleration = -Math.signum(info.getAngularVelocity());
-		}
-		currentAcceleration = currentAcceleration + (Math.signum(angleDifference) * 1.f);
-		return currentAcceleration + frictionAcceleration;
-	
+		float remainingTimeToTurn = 2.f * orientationDifference / info.getAngularVelocity();
+		float throttle = info.getAngularVelocity() * info.getAngularVelocity() / 4.f / orientationDifference;
+		System.out.println( "throttle: " + throttle);
+		System.out.println("rttt: " + remainingTimeToTurn);
+		return throttle;
+		
 	}
 
 	private float getGoalOrientation(Point targetPoint) {
