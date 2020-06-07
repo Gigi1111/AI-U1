@@ -56,13 +56,19 @@ public class MyClass extends AI {
     int listPointCounter = 1;
 
     Point prevPos = null;
+    
+    //get time elapse
+    long startTime_prevPos, startTime_counter, startTime_spin;
+    
 
     public MyClass(lenz.htw.ai4g.ai.Info info) {
         super(info);
         enlistForTournament(549481, 571269);
 
         prevCheckpoint = new Point(info.getCurrentCheckpoint());
-        
+        startTime_prevPos = System.nanoTime();    
+        startTime_counter = System.nanoTime();  
+        startTime_spin = System.nanoTime();  
        
         listPointCounter = 1;
         //prevPos is for seeing if car is always approaching next node
@@ -72,7 +78,7 @@ public class MyClass extends AI {
 
     @Override
     public String getName() {
-        return "XAEA-Xii";//slow down when close to curnode
+        return "XAEAXii";//slow down when close to curnode
     }
 
     @Override
@@ -84,11 +90,19 @@ public class MyClass extends AI {
     int interval = 200;
     @Override
     public DriverAction update(boolean wasResetAfterCollision) {
+
+    	    long endTime_prevPos = System.nanoTime();
+    	    long endTime_counter = System.nanoTime();
+    	    long endTime_spin = System.nanoTime();
+    	    double prevPosInterval = (endTime_prevPos-startTime_prevPos)/Math.pow(10, 9);
+    	    double counterInterval = (endTime_counter-startTime_counter)/Math.pow(10, 9);
+    	    double spinInterval = (endTime_spin-startTime_spin)/Math.pow(10, 9);
+    	    
     	counter++;
     	distToCheckpoint = distance(pCurPosition, info.getCurrentCheckpoint());
         Point pCurCheck = info.getCurrentCheckpoint();
         pCurPosition = new Point((int) info.getX(), (int) info.getY());
-
+       
         if(g.source == null) {
         	  g.createGraph(track,pCurPosition,pCurCheck, 13);
         	 dpq = new DPQ(g.getNumOfPoints(), g);
@@ -96,8 +110,9 @@ public class MyClass extends AI {
         }
         
         prevPosInterval++;
-        if (prevPosInterval % 5 == 0) {
-            prevPosInterval = 0;
+//        if (prevPosInterval % 5 == 0) {//TODO time 1 sec?
+        if(prevPosInterval>1) {//1 second
+        	startTime_prevPos=endTime_prevPos;
             prevPos = new Point((int) info.getX(), (int) info.getY());
         }
 
@@ -105,20 +120,16 @@ public class MyClass extends AI {
 
 
         if (!info.getCurrentCheckpoint().equals(prevCheckpoint)) {
-//	        	if(counter>interval) {
-//	        		counter = 0;
-        		//change spawn
         	spawnPoint = info.getCurrentCheckpoint();
 		           checkPointChange();
-//	        	}
         }
         
        if(shortList ==null) {
-    	   if(counter==100) {
-       		counter = 0;
-//      		counter = 0;
+    	   if(counterInterval>2) {//1 second
+    		   startTime_counter=endTime_counter;
        		recalShortestFromCurrentPos(currentPosition);
-    
+      		System.out.println("------------------------------------------");
+           System.out.println("shortList == null");
       	}
        }
         Point curNode = null;
@@ -129,19 +140,22 @@ public class MyClass extends AI {
                 curNode = shortList.get(listPointCounter);
         }
 
-        if (curNode != null && !curNode.equals(info.getCurrentCheckpoint()) && distance(null, curNode) < 20 
+        if (curNode != null && !curNode.equals(info.getCurrentCheckpoint()) && distance(null, curNode) < 20
         		
         		&& shortList != null && listPointCounter + 1 < shortList.size()) {
-     
+            System.out.println("------------------------------------------");
+            System.out.println("close enuff so move on to next");
             listPointCounter++;
 
         }
         
-        if (hasExploded() && counter%5==0) {
+        if (hasExploded() ) {//&& counter%5==0) {//TODO time
         	if(!shortList.get(0).equals(prevCheckpoint)) {
+        		 System.out.println("------------------------------------------");
+                 System.out.println("exploded");
             	recalShortestFromCurrentPos(getCurrentLocation());
             }
-
+			System.out.println("boom");
 			listPointCounter = 1;			
 		}
 
@@ -151,10 +165,11 @@ public class MyClass extends AI {
         if (curPosAndCurCheckObsctrucedByObstacles(currentPosition,pCurCheck) && 
         		distance(currentPosition,pCurCheck)>150) {
        	 
-        	if(counter>300) {
-        		counter = 0;
+        	 if(counterInterval>2) {//1 second
+             	startTime_counter=endTime_counter;
         		recalShortestFromCurrentPos(currentPosition);
-
+       		System.out.println("------------------------------------------");
+            System.out.println("path obstructed by obs");
        	}
        }
       
@@ -178,26 +193,30 @@ public class MyClass extends AI {
         //detect spinning around checkpoint and backup
         //can also use this if we stuck at a spot
         spinPosInterval++;
-        if (spinPosInterval % 40 == 0) {
-
+        if(spinInterval>15) {//2 second //TODO time
+        	
             //if to curCheck is the same as spinning(150 frame ago), then slow it down
             //if almost in same location
             if (spin != null && Math.abs(distance(spin, pCurCheck) - distance(null, pCurCheck)) < 7) {
 
-
+                System.out.println("------------------------------------------");
+                System.out.println("in spin");
                 //if already super close to check
 
                 if (distance(null, pCurCheck) < 30 && Math.abs(info.getAngularVelocity()) > 0.2) {
-               
+                    System.out.println("------------------------------------------");
+                    System.out.println("backup when spinning round curCheck");
                     spinPosInterval--;
+                    	
                     angularAcc = -info.getAngularVelocity();
 
                     return new DriverAction(-10, angularAcc);
                 } else if (distance(null, spin) < 0.5) {
-      
+                    System.out.println("------------------------------------------");
+                    System.out.println("prob will reborn");
                     listPointCounter = 1;
                 }
-
+                startTime_spin=endTime_spin;
             }
 
             spin = new Point((int) info.getX(), (int) info.getY());
@@ -221,6 +240,7 @@ public class MyClass extends AI {
             slowdown = 0;
             return new DriverAction(slowdown, angularAcc);
         }
+        
         //getThrottle with brakeRadius of 80f
         return new DriverAction(getThrottle(), angularAcc);
 
@@ -235,25 +255,30 @@ public class MyClass extends AI {
 	return point;
 }
     private boolean curPosAndCurCheckObsctrucedByObstacles(Point curPos, Point curCheck) {
-
+		// TODO Auto-generated method stub
     	
 		return g.intersectWithObs(curPos, curCheck);
 	}
 
 	private void checkPointChange() {
-
+		// TODO Auto-generated method stub
+    	 System.out.println("------------------------------------------");
+         System.out.println("in cur check ponit not equal to prev checkpoint");
+         System.out.println("in a ");
         g.updateGraphSrcAndDes(prevCheckpoint,info.getCurrentCheckpoint() );
         
         dpq = new DPQ(g.getNumOfPoints(), g);
         shortList = dpq.getShortestWay(g.source,g.destination);
-
+         System.out.println("after ");
 
          listPointCounter = 1;
          prevCheckpoint = new Point(info.getCurrentCheckpoint());
 	}
 	private void recalShortestFromCurrentPos(Point curPos) {
-	
-    
+		// TODO Auto-generated method stub
+    	 System.out.println("------------------------------------------");
+         System.out.println("recal shortset from curent po");
+         System.out.println("in a ");
         g.updateGraphSrcAndDes(curPos,info.getCurrentCheckpoint() );
         
         dpq = new DPQ(g.getNumOfPoints(), g);
@@ -340,7 +365,7 @@ public class MyClass extends AI {
         glVertex2d(info.getCurrentCheckpoint().getX(), info.getCurrentCheckpoint().getY());
         glEnd();
 
-
+       
         //draw shortest weg
         if (shortList != null) {
             for (int i = 0; i < shortList.size() - 1; i++) {

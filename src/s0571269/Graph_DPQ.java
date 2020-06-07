@@ -15,8 +15,11 @@ public class Graph_DPQ {
 	public Point destination=null;
     public Map<Point, List<Edge>> adjVertices= new HashMap<Point, List<Edge>>();
     List < Point > shortList = null;
+//    ArrayList<ArrayList<Point>> obsPlusBuffer = new ArrayList<ArrayList<Point>>();
+    Point[][] obsPlusBuffer;
     DPQ dpq;
     Polygon[] obstacles;
+    Track track;
     int buffer = 10;//buffer to nodes 10-13?
     Graph_DPQ(Point s, Point d){
 //    	adjVertices = new HashMap<Point, List<Edge>>();
@@ -130,6 +133,14 @@ public class Graph_DPQ {
     List<Point>  createGraph(Track track,Point currentPosition,Point currentCheckPoint, int pointBuffer) {
     	adjVertices = new HashMap<Point, List<Edge>>();
     	obstacles = track.getObstacles();
+    	this.track =track;
+    	int mostNodes = 0;
+    	for(int i=0;i<obstacles.length;i++) {
+    		if(mostNodes <obstacles[i].npoints) {
+    			mostNodes = obstacles[i].npoints;
+    		}
+    	}
+    	obsPlusBuffer=new Point[obstacles.length][mostNodes];
         System.out.println("in Git init");
         System.out.println("beforeupdatesource");
         buffer = pointBuffer;
@@ -181,7 +192,8 @@ public class Graph_DPQ {
 	          if (!source.equals(getPoint(i))) {
 	              Point q1 = new Point(getPoint(i).x, getPoint(i).y);
 	              if (!intersectWithObs(source, q1)) {
-	            	  //must also check it doesnt interset with 
+	            	  //must also check it doesnt interset with the other obs lines
+	            	  
 	                  addEdge(source, q1);
 	              }
 	          }
@@ -206,6 +218,7 @@ public class Graph_DPQ {
             if (!des.equals(getPoint(i))) {
                 Point q1 = new Point(getPoint(i).x, getPoint(i).y);
                 if (!intersectWithObs(des, q1)) {
+//                	if(!intersectWihtObsPlusBuffer(des,q1))
                     addEdge(des, q1);
                 }
             }
@@ -213,7 +226,7 @@ public class Graph_DPQ {
         }
     }
 
-   void setupObsNodes(Polygon[] obs) {
+void setupObsNodes(Polygon[] obs) {
         //TODO add in current location and checkpoint
         //TODO isReflex not working yet
         //not include  four corners 
@@ -225,7 +238,7 @@ public class Graph_DPQ {
                     if (!isBorder(obs[i], j)) {
                         //then check outer border
 
-                        addPoint(pointPlusBuffer(obs[i], j, buffer)); //10 is best
+                        addPoint(pointPlusBuffer(obs[i],i, j, buffer)); //10 is best
                     }
                 }
             }
@@ -258,69 +271,93 @@ public class Graph_DPQ {
         //first check if they belong to same obstacle
         //to types of check  (1)contain(to check if it's two points from same obs) (2)intersect (to see if there's other obs in between)
 
-        for (int i = 0; i < obstacles.length; i++) {
+    	 for (int i = 0; i < obstacles.length; i++) {
 
-            for (int j = 0; j < obstacles[i].npoints; j++) {
-                int N = obstacles[i].npoints;
+             for (int j = 0; j <  obstacles[i].npoints; j++) {
+                 int N =  obstacles[i].npoints;
+                 Point p2 = new Point(obstacles[i].xpoints[j], obstacles[i].ypoints[j]);
 
-                Point p2 = new Point(obstacles[i].xpoints[j], obstacles[i].ypoints[j]);
-                Point q2 = new Point(obstacles[i].xpoints[(j + 1) % N], obstacles[i].ypoints[(j + 1) % N]);
-
-                //first check they are not next to each other
-                if (!p1.equals(p2) && !p1.equals(q2) && !q1.equals(p2) && !q1.equals(q2)) {
-                    //only checking line, not checking content
-                    if (doIntersect(p1, q1, p2, q2)) {
-                        return true;
-                    }
-                    // checking if mid point contain
-                    if (obstacles[i].contains(new Point((p1.x + q1.x) / 2, (p1.y + q1.y) / 2)))
-                        return true;
-                }
-            }
-        }
+            	 Point q2 = new Point(obstacles[i].xpoints[(j + 1) % N], obstacles[i].ypoints[(j + 1) % N]);
+                 if(obsPlusBuffer[i]!=null &&  obsPlusBuffer[i][j]!=null) {
+                	p2 = new Point(obsPlusBuffer[i][j].x, obsPlusBuffer[i][j].y);
+                	 
+                 }
+                 if(obsPlusBuffer[i]!=null &&  obsPlusBuffer[i][(j + 1) % N]!=null) {
+                 	q2 = new Point(obsPlusBuffer[i][(j + 1) % N].x, obsPlusBuffer[i][(j + 1) % N].y);
+                 	 
+                  }
+                 //first check they are not next to each other
+                 if (!p1.equals(p2) && !p1.equals(q2) && !q1.equals(p2) && !q1.equals(q2)) {
+                     //only checking line, not checking content
+                     if (doIntersect(p1, q1, p2, q2)) {
+                         return true;
+                     }
+                     // checking if mid point contain
+                     if (obstacles[i].contains(new Point((p1.x + q1.x) / 2, (p1.y + q1.y) / 2)))
+                         return true;
+                 }
+             }
+         }
         return false;
     }
 
-   Point pointPlusBuffer(Polygon ob, int j, int buffer) {
-        // TODO Auto-generated method stub
+     Point pointPlusBuffer(Polygon ob, int i,int j, int buffer) {
+         // TODO Auto-generated method stub
+    	 buffer = 16;
+         int prev = j > 0 ? j - 1 : ob.npoints - 1;
+         int next = j < ob.npoints - 1 ? j + 1 : 0;
+         Point p0 = new Point(ob.xpoints[j], ob.ypoints[j]);
+         Point p1 = new Point(ob.xpoints[prev], ob.ypoints[prev]);
+         Point p2 = new Point(ob.xpoints[next], ob.ypoints[next]);
+         float xNow = p0.x;
+         float yNow=p0.y;
+         float xPrev=p1.x;
+         float yPrev=p1.y;
+         float xNext=p2.x;
+         float yNext = p2.y;
+         Vector2f v1 = new Vector2f(xNow - xPrev, yNow - yPrev);
+         Vector2f v2 = new Vector2f(xNext - xNow, yNext - yNow);
 
-        int prev = j > 0 ? j - 1 : ob.npoints - 1;
-        int next = j < ob.npoints - 1 ? j + 1 : 0;
-        Point p0 = new Point(ob.xpoints[j], ob.ypoints[j]);
-        Point p1 = new Point(ob.xpoints[prev], ob.ypoints[prev]);
-        Point p2 = new Point(ob.xpoints[next], ob.ypoints[next]);
-        double lengthPrev = Math.sqrt((p0.x - p1.x) * (p0.x - p1.x) + (p0.y - p1.y) * (p0.y - p1.y));
-        double lengthNext = Math.sqrt((p0.x - p2.x) * (p0.x - p2.x) + (p0.y - p2.y) * (p0.y - p2.y));
+         float cross = (v1.x * v2.y) - (v2.x * v1.y);
+         // if crossproduct positive: outside angle > 180
+         // if crossproduct negative: outside angle < 180
 
-
-        //find 1/lengthOfLine point of each side
-        Vector2f v01 = new Vector2f((float)(p0.x + (p1.x - p0.x) / lengthPrev), (float)(p0.y + (p1.y - p0.y) / lengthPrev));
-        Vector2f v02 = new Vector2f((float)(p0.x + (p2.x - p0.x) / lengthNext), (float)(p0.y + (p2.y - p0.y) / lengthNext));
-        //then get mid point
-        Vector2f mid = new Vector2f((v01.x + v02.x) / 2, (v01.y + v02.y) / 2);
-        //then connect this point with p0
-
-        int xBuffer=0;
-        int yBuffer=0;
-        if(p0.x== mid.x){
-        	yBuffer = buffer;
-        	 if(mid.y>p0.y) {
- 	        	yBuffer*=-1;
- 	        }
-        	
-        }
-        else {
-        	float m = (p0.y - mid.y) / (p0.x - mid.x);
-
-	        xBuffer = buffer;
-	        if (mid.x > p0.x) {
-	            xBuffer *= -1;
-	        }
-	       
-	        yBuffer = Math.round(xBuffer * m);
-	    }
-        return new Point((int) p0.x + xBuffer, (int)(p0.y + yBuffer));
-    }
+         if (cross > 0 && xPrev != 0 && yPrev != 0 && xPrev != track.getWidth() && yPrev != track.getHeight() &&
+                 xNow != 0 && yNow != 0 && xNow != track.getWidth() && yNow != track.getHeight() &&
+                 xNext != 0 && yNext != 0 && xNext != track.getWidth() && yNext != track.getHeight()) {
+             Vector2f v3 = new Vector2f(xPrev-xNow, yPrev-yNow);
+             double angle = (2*Math.PI - Vector2f.angle(v3,v2))/2;
+             Vector2f v4 = new Vector2f(xNow, yNow);
+             v3.normalise(v3);
+             v3.scale(buffer);
+             Vector2f.add(v4, v3, v3);
+             double rotX = Math.cos(angle)*(v3.x-xNow)-Math.sin(angle)*(v3.y-yNow)+xNow;
+             double rotY = Math.sin(angle)*(v3.x-xNow)+Math.cos(angle)*(v3.y-yNow)+yNow;
+             int newx2 = (int)rotX;
+             int newy2 = (int)rotY;
+             
+             
+             
+            v3 = new Vector2f(xPrev-xNow, yPrev-yNow);
+            angle = (2*Math.PI - Vector2f.angle(v3,v2))/2;
+            v4 = new Vector2f(xNow, yNow);
+            v3.normalise(v3);
+             v3.scale(buffer-2);
+             Vector2f.add(v4, v3, v3);
+             rotX = Math.cos(angle)*(v3.x-xNow)-Math.sin(angle)*(v3.y-yNow)+xNow;
+             rotY = Math.sin(angle)*(v3.x-xNow)+Math.cos(angle)*(v3.y-yNow)+yNow;
+             int buffx2 = (int)Math.floor(rotX);
+             int buffy2 = (int)Math.floor(rotY);
+             
+             
+             obsPlusBuffer[i][j]=new Point(buffx2,buffy2);
+             return new Point(newx2, newy2);
+         }
+         
+         obsPlusBuffer[i][j]=new Point(p0.x,p0.y);
+         return new Point(p0.x,p0.y);
+        
+     }
 
     boolean isBorder(Polygon ob, int j) {
         // TODO Auto-generated method stub
@@ -397,4 +434,3 @@ public class Graph_DPQ {
 	    }
 
 }
-
