@@ -309,43 +309,43 @@ void setupObsNodes(Polygon[] obs) {
          Point p0 = new Point(ob.xpoints[j], ob.ypoints[j]);
          Point p1 = new Point(ob.xpoints[prev], ob.ypoints[prev]);
          Point p2 = new Point(ob.xpoints[next], ob.ypoints[next]);
-         float x2 = p0.x;
-         float y2=p0.y;
+         float xNow = p0.x;
+         float yNow=p0.y;
          float x1=p1.x;
          float y1=p1.y;
          float x3=p2.x;
          float y3 = p2.y;
-         Vector2f v1 = new Vector2f(x2 - x1, y2 - y1);
-         Vector2f v2 = new Vector2f(x3 - x2, y3 - y2);
+         Vector2f v1 = new Vector2f(xNow - x1, yNow - y1);
+         Vector2f v2 = new Vector2f(x3 - xNow, y3 - yNow);
 
          float cross = (v1.x * v2.y) - (v2.x * v1.y);
          // if crossproduct positive: outside angle > 180
          // if crossproduct negative: outside angle < 180
 
          if (cross > 0 && x1 != 0 && y1 != 0 && x1 != track.getWidth() && y1 != track.getHeight() &&
-                 x2 != 0 && y2 != 0 && x2 != track.getWidth() && y2 != track.getHeight() &&
+                 xNow != 0 && yNow != 0 && xNow != track.getWidth() && yNow != track.getHeight() &&
                  x3 != 0 && y3 != 0 && x3 != track.getWidth() && y3 != track.getHeight()) {
-             Vector2f v3 = new Vector2f(x1-x2, y1-y2);
+             Vector2f v3 = new Vector2f(x1-xNow, y1-yNow);
              double angle = (2*Math.PI - Vector2f.angle(v3,v2))/2;
-             Vector2f v4 = new Vector2f(x2, y2);
+             Vector2f v4 = new Vector2f(xNow, yNow);
              v3.normalise(v3);
              v3.scale(buffer);
              Vector2f.add(v4, v3, v3);
-             double rotX = Math.cos(angle)*(v3.x-x2)-Math.sin(angle)*(v3.y-y2)+x2;
-             double rotY = Math.sin(angle)*(v3.x-x2)+Math.cos(angle)*(v3.y-y2)+y2;
+             double rotX = Math.cos(angle)*(v3.x-xNow)-Math.sin(angle)*(v3.y-yNow)+xNow;
+             double rotY = Math.sin(angle)*(v3.x-xNow)+Math.cos(angle)*(v3.y-yNow)+yNow;
              int newx2 = (int)rotX;
              int newy2 = (int)rotY;
              
              
              
-            v3 = new Vector2f(x1-x2, y1-y2);
+            v3 = new Vector2f(x1-xNow, y1-yNow);
             angle = (2*Math.PI - Vector2f.angle(v3,v2))/2;
-            v4 = new Vector2f(x2, y2);
+            v4 = new Vector2f(xNow, yNow);
             v3.normalise(v3);
              v3.scale(buffer-2);
              Vector2f.add(v4, v3, v3);
-             rotX = Math.cos(angle)*(v3.x-x2)-Math.sin(angle)*(v3.y-y2)+x2;
-             rotY = Math.sin(angle)*(v3.x-x2)+Math.cos(angle)*(v3.y-y2)+y2;
+             rotX = Math.cos(angle)*(v3.x-xNow)-Math.sin(angle)*(v3.y-yNow)+xNow;
+             rotY = Math.sin(angle)*(v3.x-xNow)+Math.cos(angle)*(v3.y-yNow)+yNow;
              int buffx2 = (int)Math.floor(rotX);
              int buffy2 = (int)Math.floor(rotY);
              
