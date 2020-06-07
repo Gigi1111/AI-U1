@@ -311,21 +311,21 @@ void setupObsNodes(Polygon[] obs) {
          Point p2 = new Point(ob.xpoints[next], ob.ypoints[next]);
          float xNow = p0.x;
          float yNow=p0.y;
-         float x1=p1.x;
-         float y1=p1.y;
-         float x3=p2.x;
-         float y3 = p2.y;
-         Vector2f v1 = new Vector2f(xNow - x1, yNow - y1);
-         Vector2f v2 = new Vector2f(x3 - xNow, y3 - yNow);
+         float xPrev=p1.x;
+         float yPrev=p1.y;
+         float xNext=p2.x;
+         float yNext = p2.y;
+         Vector2f v1 = new Vector2f(xNow - xPrev, yNow - yPrev);
+         Vector2f v2 = new Vector2f(xNext - xNow, yNext - yNow);
 
          float cross = (v1.x * v2.y) - (v2.x * v1.y);
          // if crossproduct positive: outside angle > 180
          // if crossproduct negative: outside angle < 180
 
-         if (cross > 0 && x1 != 0 && y1 != 0 && x1 != track.getWidth() && y1 != track.getHeight() &&
+         if (cross > 0 && xPrev != 0 && yPrev != 0 && xPrev != track.getWidth() && yPrev != track.getHeight() &&
                  xNow != 0 && yNow != 0 && xNow != track.getWidth() && yNow != track.getHeight() &&
-                 x3 != 0 && y3 != 0 && x3 != track.getWidth() && y3 != track.getHeight()) {
-             Vector2f v3 = new Vector2f(x1-xNow, y1-yNow);
+                 xNext != 0 && yNext != 0 && xNext != track.getWidth() && yNext != track.getHeight()) {
+             Vector2f v3 = new Vector2f(xPrev-xNow, yPrev-yNow);
              double angle = (2*Math.PI - Vector2f.angle(v3,v2))/2;
              Vector2f v4 = new Vector2f(xNow, yNow);
              v3.normalise(v3);
@@ -338,7 +338,7 @@ void setupObsNodes(Polygon[] obs) {
              
              
              
-            v3 = new Vector2f(x1-xNow, y1-yNow);
+            v3 = new Vector2f(xPrev-xNow, yPrev-yNow);
             angle = (2*Math.PI - Vector2f.angle(v3,v2))/2;
             v4 = new Vector2f(xNow, yNow);
             v3.normalise(v3);
