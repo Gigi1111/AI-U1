@@ -17,7 +17,7 @@ import lenz.htw.ai4g.ai.AI;
 import lenz.htw.ai4g.ai.DriverAction;
 import lenz.htw.ai4g.track.Track;
 
-public class MyClass extends AI {
+public class MyClass3 extends AI {
 
 
     float angularAcc;
@@ -56,13 +56,26 @@ public class MyClass extends AI {
     int listPointCounter = 1;
 
     Point prevPos = null;
+    
+    //get time elapse
+    long startTime_prevPos, startTime_counter, startTime_spin;
+    
+//    System.out.println("Total time: "+(endTime-startTime)/Math.pow(10, 9));
+//    startTime=endTime;
+    // ... the code being measured ...    
+//    long estimatedTime = System.nanoTime() - startTime;
+//    long startTime = System.nanoTime();
 
-    public MyClass(lenz.htw.ai4g.ai.Info info) {
+   
+
+    public MyClass3(lenz.htw.ai4g.ai.Info info) {
         super(info);
         enlistForTournament(549481, 571269);
 
         prevCheckpoint = new Point(info.getCurrentCheckpoint());
-        
+        startTime_prevPos = System.nanoTime();    
+        startTime_counter = System.nanoTime();  
+        startTime_spin = System.nanoTime();  
        
         listPointCounter = 1;
         //prevPos is for seeing if car is always approaching next node
@@ -72,7 +85,7 @@ public class MyClass extends AI {
 
     @Override
     public String getName() {
-        return "XAEA-Xii";//slow down when close to curnode
+        return "calless";//slow down when close to curnode
     }
 
     @Override
@@ -84,11 +97,22 @@ public class MyClass extends AI {
     int interval = 200;
     @Override
     public DriverAction update(boolean wasResetAfterCollision) {
+//    	 for(int i = 0; i < 1000000; i++) {
+//    	      long test = System.nanoTime();
+//    	    }
+
+    	    long endTime_prevPos = System.nanoTime();
+    	    long endTime_counter = System.nanoTime();
+    	    long endTime_spin = System.nanoTime();
+    	    double prevPosInterval = (endTime_prevPos-startTime_prevPos)/Math.pow(10, 9);
+    	    double counterInterval = (endTime_counter-startTime_counter)/Math.pow(10, 9);
+    	    double spinInterval = (endTime_spin-startTime_spin)/Math.pow(10, 9);
+    	    
     	counter++;
     	distToCheckpoint = distance(pCurPosition, info.getCurrentCheckpoint());
         Point pCurCheck = info.getCurrentCheckpoint();
         pCurPosition = new Point((int) info.getX(), (int) info.getY());
-
+       
         if(g.source == null) {
         	  g.createGraph(track,pCurPosition,pCurCheck, 13);
         	 dpq = new DPQ(g.getNumOfPoints(), g);
@@ -96,8 +120,9 @@ public class MyClass extends AI {
         }
         
         prevPosInterval++;
-        if (prevPosInterval % 5 == 0) {
-            prevPosInterval = 0;
+//        if (prevPosInterval % 5 == 0) {//TODO time 1 sec?
+        if(prevPosInterval>1) {//1 second
+        	startTime_prevPos=endTime_prevPos;
             prevPos = new Point((int) info.getX(), (int) info.getY());
         }
 
@@ -114,8 +139,8 @@ public class MyClass extends AI {
         }
         
        if(shortList ==null) {
-    	   if(counter==100) {
-       		counter = 0;
+    	   if(counterInterval>2) {//1 second
+    		   startTime_counter=endTime_counter;
 //      		counter = 0;
        		recalShortestFromCurrentPos(currentPosition);
       		System.out.println("------------------------------------------");
@@ -139,8 +164,10 @@ public class MyClass extends AI {
 
         }
         
-        if (hasExploded() && counter%5==0) {
+        if (hasExploded() ) {//&& counter%5==0) {//TODO time
         	if(!shortList.get(0).equals(prevCheckpoint)) {
+        		 System.out.println("------------------------------------------");
+                 System.out.println("exploded");
             	recalShortestFromCurrentPos(getCurrentLocation());
             }
 			System.out.println("boom");
@@ -153,8 +180,8 @@ public class MyClass extends AI {
         if (curPosAndCurCheckObsctrucedByObstacles(currentPosition,pCurCheck) && 
         		distance(currentPosition,pCurCheck)>150) {
        	 
-        	if(counter>300) {
-        		counter = 0;
+        	 if(counterInterval>2) {//1 second
+             	startTime_counter=endTime_counter;
         		recalShortestFromCurrentPos(currentPosition);
        		System.out.println("------------------------------------------");
             System.out.println("path obstructed by obs");
@@ -181,8 +208,8 @@ public class MyClass extends AI {
         //detect spinning around checkpoint and backup
         //can also use this if we stuck at a spot
         spinPosInterval++;
-        if (spinPosInterval % 40 == 0) {
-
+        if(spinInterval>15) {//2 second //TODO time
+        	
             //if to curCheck is the same as spinning(150 frame ago), then slow it down
             //if almost in same location
             if (spin != null && Math.abs(distance(spin, pCurCheck) - distance(null, pCurCheck)) < 7) {
@@ -195,6 +222,7 @@ public class MyClass extends AI {
                     System.out.println("------------------------------------------");
                     System.out.println("backup when spinning round curCheck");
                     spinPosInterval--;
+                    	
                     angularAcc = -info.getAngularVelocity();
 
                     return new DriverAction(-10, angularAcc);
@@ -203,7 +231,7 @@ public class MyClass extends AI {
                     System.out.println("prob will reborn");
                     listPointCounter = 1;
                 }
-
+                startTime_spin=endTime_spin;
             }
 
             spin = new Point((int) info.getX(), (int) info.getY());
@@ -227,6 +255,7 @@ public class MyClass extends AI {
             slowdown = 0;
             return new DriverAction(slowdown, angularAcc);
         }
+        
         //getThrottle with brakeRadius of 80f
         return new DriverAction(getThrottle(), angularAcc);
 
