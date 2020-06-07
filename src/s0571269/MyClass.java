@@ -107,7 +107,7 @@ public class MyClass extends AI {
         if (!info.getCurrentCheckpoint().equals(prevCheckpoint)) {
 //	        	if(counter>interval) {
 //	        		counter = 0;
-        		//change spwn
+        		//change spawn
         	spawnPoint = info.getCurrentCheckpoint();
 		           checkPointChange();
 //	        	}
@@ -118,8 +118,7 @@ public class MyClass extends AI {
        		counter = 0;
 //      		counter = 0;
        		recalShortestFromCurrentPos(currentPosition);
-      		System.out.println("------------------------------------------");
-           System.out.println("shortList == null");
+    
       	}
        }
         Point curNode = null;
@@ -133,8 +132,7 @@ public class MyClass extends AI {
         if (curNode != null && !curNode.equals(info.getCurrentCheckpoint()) && distance(null, curNode) < 20 
         		
         		&& shortList != null && listPointCounter + 1 < shortList.size()) {
-            System.out.println("------------------------------------------");
-            System.out.println("close enuff so move on to next");
+     
             listPointCounter++;
 
         }
@@ -143,7 +141,7 @@ public class MyClass extends AI {
         	if(!shortList.get(0).equals(prevCheckpoint)) {
             	recalShortestFromCurrentPos(getCurrentLocation());
             }
-			System.out.println("boom");
+
 			listPointCounter = 1;			
 		}
 
@@ -156,8 +154,7 @@ public class MyClass extends AI {
         	if(counter>300) {
         		counter = 0;
         		recalShortestFromCurrentPos(currentPosition);
-       		System.out.println("------------------------------------------");
-            System.out.println("path obstructed by obs");
+
        	}
        }
       
@@ -187,20 +184,17 @@ public class MyClass extends AI {
             //if almost in same location
             if (spin != null && Math.abs(distance(spin, pCurCheck) - distance(null, pCurCheck)) < 7) {
 
-                System.out.println("------------------------------------------");
-                System.out.println("in spin");
+
                 //if already super close to check
 
                 if (distance(null, pCurCheck) < 30 && Math.abs(info.getAngularVelocity()) > 0.2) {
-                    System.out.println("------------------------------------------");
-                    System.out.println("backup when spinning round curCheck");
+               
                     spinPosInterval--;
                     angularAcc = -info.getAngularVelocity();
 
                     return new DriverAction(-10, angularAcc);
                 } else if (distance(null, spin) < 0.5) {
-                    System.out.println("------------------------------------------");
-                    System.out.println("prob will reborn");
+      
                     listPointCounter = 1;
                 }
 
@@ -241,30 +235,25 @@ public class MyClass extends AI {
 	return point;
 }
     private boolean curPosAndCurCheckObsctrucedByObstacles(Point curPos, Point curCheck) {
-		// TODO Auto-generated method stub
+
     	
 		return g.intersectWithObs(curPos, curCheck);
 	}
 
 	private void checkPointChange() {
-		// TODO Auto-generated method stub
-    	 System.out.println("------------------------------------------");
-         System.out.println("in cur check ponit not equal to prev checkpoint");
-         System.out.println("in a ");
+
         g.updateGraphSrcAndDes(prevCheckpoint,info.getCurrentCheckpoint() );
         
         dpq = new DPQ(g.getNumOfPoints(), g);
         shortList = dpq.getShortestWay(g.source,g.destination);
-         System.out.println("after ");
+
 
          listPointCounter = 1;
          prevCheckpoint = new Point(info.getCurrentCheckpoint());
 	}
 	private void recalShortestFromCurrentPos(Point curPos) {
-		// TODO Auto-generated method stub
-    	 System.out.println("------------------------------------------");
-         System.out.println("recal shortset from curent po");
-         System.out.println("in a ");
+	
+    
         g.updateGraphSrcAndDes(curPos,info.getCurrentCheckpoint() );
         
         dpq = new DPQ(g.getNumOfPoints(), g);
@@ -351,16 +340,7 @@ public class MyClass extends AI {
         glVertex2d(info.getCurrentCheckpoint().getX(), info.getCurrentCheckpoint().getY());
         glEnd();
 
-        //draw all the edges
-        //     for (Map.Entry<Point, List<Edge>> entry : g.adjVertices.entrySet()) {
-        //    	 for(Edge v : entry.getValue()) {
-        //	    	 glBegin(GL_LINES);
-        //	         glColor3f(1,1,1);
-        //			 glVertex2f(entry.getKey().x,entry.getKey().y);
-        //			 glVertex2f(v.point.x,v.point.y);
-        //			 glEnd();
-        //    	 }
-        //     }
+
         //draw shortest weg
         if (shortList != null) {
             for (int i = 0; i < shortList.size() - 1; i++) {

@@ -43,7 +43,6 @@ public class DPQ{
 			Point currentPoint = start;
 			dist = new HashMap<>();
 			if(graph==null) {
-				System.out.println("graph is null");
 				return null;
 			}
 			if(graph.getAllNodes()!=null) {
@@ -57,14 +56,9 @@ public class DPQ{
 				dist.put(start, 0.f);
 				while (!currentPoint.equals(destination)) {
 					
-					if(graph.getNeighbours(currentPoint)==null) {
-						System.out.println("raph.getNeighbours(currentPoint)==null");
-					}
+					
 					
 					for (Edge neighbour : graph.getNeighbours(currentPoint)) {
-						if(neighbour==null) {
-							System.out.println("neighbour==null");
-						}
 						if (unvisited.contains(neighbour.point)) {
 							float distanceToCurrentPoint = (float) neighbour.cost;
 							float tentativeDistance = distanceToCurrentPoint + currentDistance;
@@ -86,8 +80,7 @@ public class DPQ{
 				}
 				
 		    	return generateShortestPath(start, destination);
-			}
-			System.out.println("not ready yet");
+			}		
 			return null;
 
 		}
@@ -97,9 +90,7 @@ public class DPQ{
 			path.add(destination);
 			while (! currentPoint.equals(start)) {
 				currentPoint = this.weg.get(currentPoint);
-				if (currentPoint == null) {
-					System.out.println("ERROR in generate shortest path!!!");
-				}
+
 				path.add(0, currentPoint);
 				
 			}
@@ -128,8 +119,5 @@ public class DPQ{
 			}
 			return false;
 		}
-
-	
-
 		
 }
