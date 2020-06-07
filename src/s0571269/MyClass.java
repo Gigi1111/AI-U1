@@ -17,7 +17,7 @@ import lenz.htw.ai4g.ai.AI;
 import lenz.htw.ai4g.ai.DriverAction;
 import lenz.htw.ai4g.track.Track;
 
-public class MyClass3 extends AI {
+public class MyClass extends AI {
 
 
     float angularAcc;
@@ -60,15 +60,8 @@ public class MyClass3 extends AI {
     //get time elapse
     long startTime_prevPos, startTime_counter, startTime_spin;
     
-//    System.out.println("Total time: "+(endTime-startTime)/Math.pow(10, 9));
-//    startTime=endTime;
-    // ... the code being measured ...    
-//    long estimatedTime = System.nanoTime() - startTime;
-//    long startTime = System.nanoTime();
 
-   
-
-    public MyClass3(lenz.htw.ai4g.ai.Info info) {
+    public MyClass(lenz.htw.ai4g.ai.Info info) {
         super(info);
         enlistForTournament(549481, 571269);
 
@@ -85,7 +78,7 @@ public class MyClass3 extends AI {
 
     @Override
     public String getName() {
-        return "calless";//slow down when close to curnode
+        return "XAEAXii";//slow down when close to curnode
     }
 
     @Override
@@ -97,9 +90,6 @@ public class MyClass3 extends AI {
     int interval = 200;
     @Override
     public DriverAction update(boolean wasResetAfterCollision) {
-//    	 for(int i = 0; i < 1000000; i++) {
-//    	      long test = System.nanoTime();
-//    	    }
 
     	    long endTime_prevPos = System.nanoTime();
     	    long endTime_counter = System.nanoTime();
@@ -130,18 +120,13 @@ public class MyClass3 extends AI {
 
 
         if (!info.getCurrentCheckpoint().equals(prevCheckpoint)) {
-//	        	if(counter>interval) {
-//	        		counter = 0;
-        		//change spwn
         	spawnPoint = info.getCurrentCheckpoint();
 		           checkPointChange();
-//	        	}
         }
         
        if(shortList ==null) {
     	   if(counterInterval>2) {//1 second
     		   startTime_counter=endTime_counter;
-//      		counter = 0;
        		recalShortestFromCurrentPos(currentPosition);
       		System.out.println("------------------------------------------");
            System.out.println("shortList == null");
