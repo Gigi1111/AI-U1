@@ -17,7 +17,7 @@ import lenz.htw.ai4g.ai.AI;
 import lenz.htw.ai4g.ai.DriverAction;
 import lenz.htw.ai4g.track.Track;
 
-public class MyClass3 extends AI {
+public class MyClass4 extends AI {
 
 
     float angularAcc;
@@ -44,11 +44,11 @@ public class MyClass3 extends AI {
     Point prevCheckpoint;
 
     //graph and shortweg
-    Graph_DPQ g = new Graph_DPQ();
+    Graph_DPQ2 g = new Graph_DPQ2();
     int bufferFromObs = 10;
     List < Point > shortList = null;
     boolean getShortest = true;
-    DPQ dpq = null;
+    DPQ2 DPQ2 = null;
     
     Point spawnPoint = new Point();
 
@@ -68,7 +68,7 @@ public class MyClass3 extends AI {
 
    
 
-    public MyClass3(lenz.htw.ai4g.ai.Info info) {
+    public MyClass4(lenz.htw.ai4g.ai.Info info) {
         super(info);
         enlistForTournament(549481, 571269);
 
@@ -85,7 +85,7 @@ public class MyClass3 extends AI {
 
     @Override
     public String getName() {
-        return "calless";//slow down when close to curnode
+        return "originalGraph";//slow down when close to curnode
     }
 
     @Override
@@ -115,8 +115,8 @@ public class MyClass3 extends AI {
        
         if(g.source == null) {
         	  g.createGraph(track,pCurPosition,pCurCheck, 13);
-        	 dpq = new DPQ(g.getNumOfPoints(), g);
-	           shortList = dpq.getShortestWay(g.source,g.destination);
+        	 DPQ2 = new DPQ2(g.getNumOfPoints(), g);
+	           shortList = DPQ2.getShortestWay(g.source,g.destination);
         }
         
         prevPosInterval++;
@@ -155,7 +155,7 @@ public class MyClass3 extends AI {
                 curNode = shortList.get(listPointCounter);
         }
 
-        if (curNode != null && !curNode.equals(info.getCurrentCheckpoint()) && distance(null, curNode) < 20
+        if (curNode != null && !curNode.equals(info.getCurrentCheckpoint()) && distance(null, curNode) < 20 
         		
         		&& shortList != null && listPointCounter + 1 < shortList.size()) {
             System.out.println("------------------------------------------");
@@ -282,8 +282,8 @@ public class MyClass3 extends AI {
          System.out.println("in a ");
         g.updateGraphSrcAndDes(prevCheckpoint,info.getCurrentCheckpoint() );
         
-        dpq = new DPQ(g.getNumOfPoints(), g);
-        shortList = dpq.getShortestWay(g.source,g.destination);
+        DPQ2 = new DPQ2(g.getNumOfPoints(), g);
+        shortList = DPQ2.getShortestWay(g.source,g.destination);
          System.out.println("after ");
 
          listPointCounter = 1;
@@ -296,8 +296,8 @@ public class MyClass3 extends AI {
          System.out.println("in a ");
         g.updateGraphSrcAndDes(curPos,info.getCurrentCheckpoint() );
         
-        dpq = new DPQ(g.getNumOfPoints(), g);
-        shortList = dpq.getShortestWay(g.source,g.destination);
+        DPQ2 = new DPQ2(g.getNumOfPoints(), g);
+        shortList = DPQ2.getShortestWay(g.source,g.destination);
          System.out.println("after ");
 
          listPointCounter = 1;

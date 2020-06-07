@@ -154,7 +154,7 @@ public class MyClass2 extends AI {
                 curNode = shortList.get(listPointCounter);
         }
 
-        if (curNode != null && !curNode.equals(info.getCurrentCheckpoint()) && distance(null, curNode) < 20 
+        if (curNode != null && !curNode.equals(info.getCurrentCheckpoint()) && distance(null, curNode) < 20
         		
         		&& shortList != null && listPointCounter + 1 < shortList.size()) {
             System.out.println("------------------------------------------");
