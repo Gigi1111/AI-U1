@@ -25,8 +25,6 @@ public class Graph_DPQ {
     }
     Graph_DPQ(){
     	adjVertices = new HashMap<Point, List<Edge>>();
-//    	source = new Point(s);
-//    	destination = new Point(d);
     }
     List<Point> getAllNodes(){
     	 List<Point> keyList = new ArrayList<Point>(adjVertices.keySet());
@@ -48,8 +46,7 @@ public class Graph_DPQ {
     	if(destination!=null) {
     		source = destination;
     	}
-//    	if(getEdgeList(p)==null)
-//    		adjVertices.put(new Point(p), new ArrayList<Edge>());
+
     }
     void addDes(Point p) {
     	destination = p;
@@ -100,16 +97,7 @@ public class Graph_DPQ {
         }
     	return null;
     }
-//    void removeEdge(Point p1, Point p2) {
-//        Point v1 = new Point(p1);
-//        Point v2 = new Point(p2);
-//        List<Edge> eV1 = adjVertices.get(v1);
-//        List<Edge> eV2 = adjVertices.get(v2);
-//        if (eV1 != null)
-//            eV1.remove(v2);
-//        if (eV2 != null)
-//            eV2.remove(v1);
-//    }
+
     List<Edge> getAdjVertices(Point p) {
         return adjVertices.get(new Point(p));
     }
@@ -170,10 +158,6 @@ public class Graph_DPQ {
         System.out.println("src:" + source);
         System.out.println("des:" + destination);
 
-//        dpq = new DPQ(getNumOfPoints(), this);
-//        //here
-////        dpq.dijkstra();
-//        shortList = dpq.getShortestWay(source,destination);
        
         System.out.println("after sh ");
         return shortList;
@@ -184,17 +168,7 @@ public class Graph_DPQ {
      
       if(startPoint!=null) {//new startpoint
 	     	startPoint = new Point(startPoint);
-	      //if it's an update, remove first then add
-//	      if (g.source != null && !g.source.equals(startPoint)) {
-//	          System.out.println("remove prev source");
-//	          if (g.removeSrc()) {
-//	              System.out.println("done");
-//	              stillUpdating = false;
-//	          }
-//	
-//	      } else if (g.source == null) {
-//	          stillUpdating = false;
-//	      }
+
 	      System.out.println("- - numOfPoints after:" + getNumOfPoints());
 	      System.out.println("new startpoint");
 	      addSrc(startPoint);
@@ -218,29 +192,12 @@ public class Graph_DPQ {
     	  setSrcToPrevDes();
       }
   }
-//    private void updateSource() {
-//        stillUpdating = true;
-//       
-//    }
+
     void updateDes(Point des) {
 
-//        //if it's an update, remove first then add
-//        if (g.destination != null && !g.destination.equals(des)) {
-//            System.out.println("remove prev destination");
-//            if (g.removeDes()) {
-//                System.out.println("done");
-//                stillUpdating = false;
-//            }
-//
-//        } else if (g.destination == null) {
-//            stillUpdating = false;
-//        }
         System.out.println("new destination");
         addDes(des);
         System.out.println(des + "," + destination);
-
-
-
 
         //then add the edges with new source
         int i = 0;

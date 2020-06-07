@@ -17,7 +17,7 @@ import lenz.htw.ai4g.ai.AI;
 import lenz.htw.ai4g.ai.DriverAction;
 import lenz.htw.ai4g.track.Track;
 
-public class MyClass_sat4 extends AI {
+public class MyClass extends AI {
 
 
     float angularAcc;
@@ -57,7 +57,7 @@ public class MyClass_sat4 extends AI {
 
     Point prevPos = null;
 
-    public MyClass_sat4(lenz.htw.ai4g.ai.Info info) {
+    public MyClass(lenz.htw.ai4g.ai.Info info) {
         super(info);
         enlistForTournament(549481, 571269);
 
@@ -72,7 +72,7 @@ public class MyClass_sat4 extends AI {
 
     @Override
     public String getName() {
-        return "Testtttt";//slow down when close to curnode
+        return "XAEA-Xii";//slow down when close to curnode
     }
 
     @Override
@@ -138,18 +138,7 @@ public class MyClass_sat4 extends AI {
             listPointCounter++;
 
         }
-        //todo location == last checkpoint
-//        if (prevPos != null && (distance(prevPos, info.getCurrentCheckpoint()) + 200 < distance(currentPosition, info.getCurrentCheckpoint()))) {
-//        	
-//	        	System.out.println("------------------------------------------");
-//	            System.out.println("new born or prev to check < than currentc to checkpoint");
-//	            //TOD no need ot update, just turn the lit back to 1
-//	            if(prevCheckpoint.equals(info.getCurrentCheckpoint()) || !shortList.get(0).equals(prevCheckpoint)) {
-//	            	checkPointChange();
-//	            }
-//	            listPointCounter = 1;
-//        	
-//        }
+        
         if (hasExploded() && counter%5==0) {
         	if(!shortList.get(0).equals(prevCheckpoint)) {
             	recalShortestFromCurrentPos(getCurrentLocation());
@@ -159,14 +148,13 @@ public class MyClass_sat4 extends AI {
 		}
 
        
-        
+
 //if obstructed by ob and not super close to curCheck
         if (curPosAndCurCheckObsctrucedByObstacles(currentPosition,pCurCheck) && 
         		distance(currentPosition,pCurCheck)>150) {
        	 
         	if(counter>300) {
         		counter = 0;
-//       		counter = 0;
         		recalShortestFromCurrentPos(currentPosition);
        		System.out.println("------------------------------------------");
             System.out.println("path obstructed by obs");
