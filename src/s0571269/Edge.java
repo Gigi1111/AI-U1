@@ -13,7 +13,7 @@ public class Edge implements Comparator<Edge> {
 	
 	public Edge(Point p, float cost) 
 	{ 
-	   this.point = new Point(p.x,p.y); 
+	   this.point = p; 
 	   this.cost = cost; 
 	} 
 	
@@ -26,4 +26,10 @@ public class Edge implements Comparator<Edge> {
 	       return 1; 
 	   return 0; 
 	} 
+	public boolean containsPoint(Point p) {
+		if(p.equals(p))
+			return true;
+		
+		return false;
+	}
 } 
