@@ -130,8 +130,18 @@ public class MyClass extends AI {
        		recalShortestFromCurrentPos(currentPosition);
       		System.out.println("------------------------------------------");
            System.out.println("shortList == null");
+           listPointCounter=1;
       	}
        }
+       if(counterInterval>3) {//re cal every 5 seconds
+    	   
+		   startTime_counter=endTime_counter;
+   		recalShortestFromCurrentPos(currentPosition);
+  		System.out.println("------------------------------------------");
+       System.out.println("shortList == null");
+       listPointCounter=1;
+  	}
+       
         Point curNode = null;
         if (shortList != null && listPointCounter < shortList.size())
             curNode = shortList.get(listPointCounter); //info.getCurrentCheckpoint();
@@ -140,7 +150,7 @@ public class MyClass extends AI {
                 curNode = shortList.get(listPointCounter);
         }
 
-        if (curNode != null && !curNode.equals(info.getCurrentCheckpoint()) && distance(null, curNode) < 20
+        if (curNode != null && !curNode.equals(info.getCurrentCheckpoint()) && distance(null, curNode) < 17
         		
         		&& shortList != null && listPointCounter + 1 < shortList.size()) {
             System.out.println("------------------------------------------");
@@ -365,7 +375,16 @@ public class MyClass extends AI {
         glVertex2d(info.getCurrentCheckpoint().getX(), info.getCurrentCheckpoint().getY());
         glEnd();
 
-       
+        //draw all the edges
+        //     for (Map.Entry<Point, List<Edge>> entry : g.adjVertices.entrySet()) {
+        //    	 for(Edge v : entry.getValue()) {
+        //	    	 glBegin(GL_LINES);
+        //	         glColor3f(1,1,1);
+        //			 glVertex2f(entry.getKey().x,entry.getKey().y);
+        //			 glVertex2f(v.point.x,v.point.y);
+        //			 glEnd();
+        //    	 }
+        //     }
         //draw shortest weg
         if (shortList != null) {
             for (int i = 0; i < shortList.size() - 1; i++) {
